@@ -2,7 +2,10 @@ package;
 
 import js.Lib;
 import pixi.core.graphics.Graphics;
+import pixi.loaders.Loader;
 import pixi.plugins.app.Application;
+import sheep.sheep.race.views.HomeView;
+import sheep.sheep.race.views.IntroView;
 
 /**
  * ...
@@ -15,21 +18,25 @@ class Main extends Application
 	{
 		super();
 		
-		_init();
+		init();
 	}
 	
-	function _init() 
+	function init() 
 	{
-		backgroundColor = 0xFF6600;
+		backgroundColor = 0xFFFFFF;
 		super.start( Application.AUTO );
-	 
-		var graphic:Graphics = new Graphics();
-		graphic.beginFill(0xFF0000, .3);
-		graphic.drawRect(0, 0, 640, 480);
-		graphic.endFill();
-		
-		stage.addChild(graphic);
+	 		
+		var loader:Loader = new Loader();
+		loader.add("font", "assets/fonts/setzer_pixel_font.xml");
+		loader.add("mc", "assets/atlas/sheep_spritesheet.json");
+		loader.load( onLoaded );
 	}
+	
+	function onLoaded() 
+	{
+		//stage.addChild(new IntroView());		
+		stage.addChild(new HomeView());		
+	}	
 	
 	static function main() 
 	{

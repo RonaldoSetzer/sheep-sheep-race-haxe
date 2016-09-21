@@ -139,21 +139,23 @@ pixi_plugins_app_Application.prototype = {
 };
 var Main = function() {
 	pixi_plugins_app_Application.call(this);
-	this._init();
+	this.init();
 };
 Main.main = function() {
 	new Main();
 };
 Main.__super__ = pixi_plugins_app_Application;
 Main.prototype = $extend(pixi_plugins_app_Application.prototype,{
-	_init: function() {
-		this.backgroundColor = 16737792;
+	init: function() {
+		this.backgroundColor = 16777215;
 		pixi_plugins_app_Application.prototype.start.call(this,"auto");
-		var graphic = new PIXI.Graphics();
-		graphic.beginFill(16711680,.3);
-		graphic.drawRect(0,0,640,480);
-		graphic.endFill();
-		this.stage.addChild(graphic);
+		var loader = new PIXI.loaders.Loader();
+		loader.add("font","assets/fonts/setzer_pixel_font.xml");
+		loader.add("mc","assets/atlas/sheep_spritesheet.json");
+		loader.load($bind(this,this.onLoaded));
+	}
+	,onLoaded: function() {
+		this.stage.addChild(new sheep_sheep_race_views_HomeView());
 	}
 });
 var Perf = $hx_exports["Perf"] = function(pos,offset) {
@@ -395,6 +397,79 @@ Reflect.field = function(o,field) {
 		return null;
 	}
 };
+var sheep_sheep_race_assets_Assets = function() { };
+sheep_sheep_race_assets_Assets.getTexture = function(prefix) {
+	return PIXI.Texture.fromFrame(prefix);
+};
+var sheep_sheep_race_info_AssetsInfo = function() { };
+var sheep_sheep_race_info_ColorInfo = function() { };
+var sheep_sheep_race_utils_SpriteFactory = function() { };
+sheep_sheep_race_utils_SpriteFactory.getBitmapText = function(text) {
+	if(text == null) {
+		text = "";
+	}
+	return new PIXI.extras.BitmapText(text,{ font : "20px SetzerPixelFont", align : "center"});
+};
+sheep_sheep_race_utils_SpriteFactory.getSprite = function(assetsKey,alignCenter) {
+	if(alignCenter == null) {
+		alignCenter = false;
+	}
+	var img = new PIXI.Sprite(PIXI.Texture.fromFrame(assetsKey));
+	if(alignCenter) {
+		img.anchor.set(0.5);
+	}
+	return img;
+};
+sheep_sheep_race_utils_SpriteFactory.getColorBox = function(width,height,color,alpha) {
+	if(alpha == null) {
+		alpha = 1.0;
+	}
+	if(color == null) {
+		color = 16711680;
+	}
+	var background = new PIXI.Graphics();
+	background.beginFill(color,alpha);
+	background.drawRect(0,0,width,height);
+	background.endFill();
+	return background;
+};
+sheep_sheep_race_utils_SpriteFactory.getBackgroundColor = function(color,alpha) {
+	if(alpha == null) {
+		alpha = 1.0;
+	}
+	if(color == null) {
+		color = 16711680;
+	}
+	return sheep_sheep_race_utils_SpriteFactory.getColorBox(640,480,color,alpha);
+};
+var sheep_sheep_race_utils_ViewPort = function() { };
+sheep_sheep_race_utils_ViewPort.alignCenter = function(object) {
+	object.position.set(320,240);
+};
+var sheep_sheep_race_views_HomeView = function() {
+	PIXI.Container.call(this);
+	this.addChild(sheep_sheep_race_utils_SpriteFactory.getBackgroundColor(3655644));
+	this.addChild(sheep_sheep_race_utils_SpriteFactory.getSprite("background_game.png"));
+	var logo = sheep_sheep_race_utils_SpriteFactory.getSprite("sheep_logo.png",true);
+	logo.x = 320;
+	logo.y = 144.;
+	this.addChild(logo);
+};
+sheep_sheep_race_views_HomeView.__super__ = PIXI.Container;
+sheep_sheep_race_views_HomeView.prototype = $extend(PIXI.Container.prototype,{
+});
+var sheep_sheep_race_views_IntroView = function() {
+	PIXI.Container.call(this);
+	this.addChild(sheep_sheep_race_utils_SpriteFactory.getBackgroundColor(3655644));
+	var text = sheep_sheep_race_utils_SpriteFactory.getBitmapText("RONALDO SANTIAGO");
+	text.pivot.set(text.width * 0.5,text.height * 0.5);
+	sheep_sheep_race_utils_ViewPort.alignCenter(text);
+	this.addChild(text);
+};
+sheep_sheep_race_views_IntroView.__super__ = PIXI.Container;
+sheep_sheep_race_views_IntroView.prototype = $extend(PIXI.Container.prototype,{
+});
+var sheep_sheep_race_views_TextInfo = function() { };
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 pixi_plugins_app_Application.AUTO = "auto";
@@ -418,5 +493,14 @@ Perf.TOP_RIGHT = "TR";
 Perf.BOTTOM_LEFT = "BL";
 Perf.BOTTOM_RIGHT = "BR";
 Perf.DELAY_TIME = 4000;
+sheep_sheep_race_info_AssetsInfo.FONT = "20px SetzerPixelFont";
+sheep_sheep_race_info_AssetsInfo.SHEEP_LOGO = "sheep_logo.png";
+sheep_sheep_race_info_AssetsInfo.BACKGROUND_GAME = "background_game.png";
+sheep_sheep_race_info_ColorInfo.BACKGROUND_SKY = 3655644;
+sheep_sheep_race_utils_ViewPort.MAX_WIDTH = 640;
+sheep_sheep_race_utils_ViewPort.MAX_HEIGHT = 480;
+sheep_sheep_race_utils_ViewPort.HALF_WIDTH = 320;
+sheep_sheep_race_utils_ViewPort.HALF_HEIGHT = 240;
+sheep_sheep_race_views_TextInfo.DEVELOPER = "RONALDO SANTIAGO";
 Main.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this);
