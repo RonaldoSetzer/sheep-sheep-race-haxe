@@ -4,6 +4,7 @@ import pixi.core.display.Container;
 import pixi.core.graphics.Graphics;
 import pixi.extras.BitmapText;
 import sheep.sheep.race.info.ColorInfo;
+import sheep.sheep.race.info.TextInfo;
 import sheep.sheep.race.utils.SpriteFactory;
 import sheep.sheep.race.utils.ViewPort;
 
