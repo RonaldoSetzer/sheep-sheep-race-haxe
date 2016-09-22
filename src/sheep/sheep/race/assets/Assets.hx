@@ -11,4 +11,16 @@ class Assets
 	{
 		return Texture.fromFrame(prefix);
 	}
+
+	public static inline function getTextures( list:Array<String> ):Array<Texture> 
+	{
+		var textures:Array<Texture> =  new Array<Texture>();
+		
+		for ( i in 0...list.length )
+		{
+			textures.push(getTexture(list[i]));
+		}
+		
+		return textures;
+	}	
 }

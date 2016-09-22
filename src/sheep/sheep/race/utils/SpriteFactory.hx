@@ -1,7 +1,9 @@
 package sheep.sheep.race.utils;
+import pixi.core.display.Container;
 import pixi.core.graphics.Graphics;
 import pixi.core.sprites.Sprite;
 import pixi.extras.BitmapText;
+import pixi.extras.MovieClip;
 import sheep.sheep.race.assets.Assets;
 import sheep.sheep.race.info.AssetsInfo;
 import sheep.sheep.race.info.TextInfo;
@@ -24,6 +26,20 @@ class SpriteFactory
 		if(alignCenter) img.anchor.set(0.5);
 		return img;
 	}
+	
+	static public function getEmptyContainer():Container
+	{
+		return new Container();
+	}
+	
+	static public function getMovieClip( assetsKeys:Array<String>):MovieClip
+	{
+		var movieclip:MovieClip = new MovieClip(Assets.getTextures(assetsKeys));
+		movieclip.animationSpeed = 0.15;
+		movieclip.stop();
+		return movieclip;
+	}
+	
 	
 	static public function getColorBox( width:Float, height:Float, color:Int = 0xFF0000, alpha:Float = 1.0 ):Graphics
 	{
