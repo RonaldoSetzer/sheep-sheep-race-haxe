@@ -1,16 +1,23 @@
 package sheep.sheep.race.setup;
 import pixi.core.display.Container;
 import sheep.sheep.race.events.FlowEvent;
+import sheep.sheep.race.mediators.AlertPopupMediator;
+import sheep.sheep.race.mediators.BetFeedbackPopupMediator;
+import sheep.sheep.race.mediators.BetPopupMediator;
 import sheep.sheep.race.mediators.GameViewMediator;
 import sheep.sheep.race.mediators.IntroViewMediator;
+import sheep.sheep.race.mediators.StartingPopupMediator;
 import sheep.sheep.race.mvc.FlowManager;
 import sheep.sheep.race.mvc.MediatorMap;
 import sheep.sheep.race.mvc.ViewManager;
 import sheep.sheep.race.mediators.HomeViewMediator;
+import sheep.sheep.race.views.AlertPopup;
+import sheep.sheep.race.views.BetFeedbackPopup;
 import sheep.sheep.race.views.BetPopup;
 import sheep.sheep.race.views.GameView;
 import sheep.sheep.race.views.HomeView;
 import sheep.sheep.race.views.IntroView;
+import sheep.sheep.race.views.StartingPopup;
 
 /**
  * ...
@@ -30,14 +37,22 @@ class ContextConfig
 		mediatorMap.map(IntroView, IntroViewMediator);
 		mediatorMap.map(HomeView, HomeViewMediator);
 		mediatorMap.map(GameView, GameViewMediator);
-		mediatorMap.map(GameView, GameViewMediator);
+		
+		mediatorMap.map(AlertPopup, AlertPopupMediator);
+		mediatorMap.map(BetPopup, BetPopupMediator);
+		mediatorMap.map(BetFeedbackPopup, BetFeedbackPopupMediator);
+		mediatorMap.map(StartingPopup, StartingPopupMediator);
 		
 		flowManager = new FlowManager( stage, mediatorMap );
 		
 		flowManager.mapSetView( FlowEvent.SHOW_INTRO, IntroView );
 		flowManager.mapSetView( FlowEvent.SHOW_HOME, HomeView );
 		flowManager.mapSetView( FlowEvent.SHOW_GAME, GameView );
-		flowManager.mapSetView( FlowEvent.ADD_BET_POPUP, BetPopup );
+		
+		flowManager.mapAddView( FlowEvent.ADD_ALERT_POPUP, AlertPopup );
+		flowManager.mapAddView( FlowEvent.ADD_BET_POPUP, BetPopup );
+		flowManager.mapAddView( FlowEvent.ADD_BET_FEEDBACK_POPUP, BetFeedbackPopup );
+		flowManager.mapAddView( FlowEvent.ADD_STARTING_POPUP, StartingPopup );
 		
 		init();
 	}

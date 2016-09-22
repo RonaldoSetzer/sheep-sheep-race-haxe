@@ -8,17 +8,14 @@ import sheep.sheep.race.info.TextInfo;
 import sheep.sheep.race.utils.SpriteFactory;
 import sheep.sheep.race.utils.ViewPort;
 import sheep.sheep.race.views.components.Button;
-import sheep.sheep.race.views.components.SheepSelector;
 
 /**
  * ...
  * @author Ronaldo Santiago
  */
-class BetPopup extends Container 
+class AlertPopup extends Container 
 {
-	public var startButton:Button;
-	public var sheepSelectorFirst:SheepSelector;
-	public var sheepSelectorLast:SheepSelector;
+	public var okButton:Button;
 
 	public function new() 
 	{
@@ -36,28 +33,23 @@ class BetPopup extends Container
 		titleBackground.y = 15;
 		container.addChild(titleBackground);
 		
-		var title:BitmapText = SpriteFactory.getBitmapText( TextInfo.TITLE_BET );
+		var title:BitmapText = SpriteFactory.getBitmapText( TextInfo.TITLE_ALERT );
 		title.x = container.width * 0.5;
 		title.y = 22;
 		title.pivot.x = title.width * 0.5;
 		container.addChild( title );
 		
-		sheepSelectorFirst = new SheepSelector( TextInfo.FIRST_POSITION);
-		sheepSelectorFirst.x = container.width * 0.5 - 70;
-		sheepSelectorFirst.y = container.height * 0.5 -20;
-		container.addChild( sheepSelectorFirst);
+		var msg:BitmapText = SpriteFactory.getBitmapText( TextInfo.BET_MISTAKE );
+		msg.x = container.width * 0.5;
+		msg.y = container.width * 0.35;
+		msg.pivot.x = msg.width * 0.5;
+		container.addChild( msg );
 		
-		sheepSelectorLast = new SheepSelector( TextInfo.LAST_POSITION);
-		sheepSelectorLast.x = container.width * 0.5 + 70;
-		sheepSelectorLast.y = container.height * 0.5 -20;
-		sheepSelectorLast.back();
-		container.addChild( sheepSelectorLast);
+		okButton = SpriteFactory.getBasicButton( TextInfo.BUTTON_OK );
+		okButton.x = container.width * 0.5;
+		okButton.y = container.height * 0.85;
+		container.addChild( okButton );
 		
-		startButton = SpriteFactory.getBasicButton( TextInfo.BUTTON_START );
-		startButton.x = container.width * 0.5;
-		startButton.y = container.height * 0.85;
-		container.addChild( startButton );
-			
 		container.pivot.set(container.width * 0.5,0);
 	}
 	
