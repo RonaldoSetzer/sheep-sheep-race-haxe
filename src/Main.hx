@@ -4,6 +4,7 @@ import js.Lib;
 import pixi.core.graphics.Graphics;
 import pixi.loaders.Loader;
 import pixi.plugins.app.Application;
+import sheep.sheep.race.setup.ContextConfig;
 import sheep.sheep.race.views.GameView;
 import sheep.sheep.race.views.HomeView;
 import sheep.sheep.race.views.IntroView;
@@ -35,9 +36,7 @@ class Main extends Application
 	
 	function onLoaded() 
 	{
-		//stage.addChild(new IntroView());		
-		//stage.addChild(new HomeView());		
-		stage.addChild(new GameView());		
+		var context:ContextConfig = new ContextConfig( stage );
 	}	
 	
 	static function main() 

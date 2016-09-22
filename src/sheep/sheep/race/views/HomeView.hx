@@ -15,6 +15,8 @@ import sheep.sheep.race.views.components.Button;
  */
 class HomeView extends Container 
 {
+	public var startButton:Button;
+	
 	public function new() 
 	{
 		super();
@@ -27,7 +29,7 @@ class HomeView extends Container
 		logo.y = ViewPort.MAX_HEIGHT * .3;
 		addChild( logo );
 		
-		var startButton:Button = SpriteFactory.getBasicButton( TextInfo.BUTTON_START );
+		startButton = SpriteFactory.getBasicButton( TextInfo.BUTTON_START );
 		startButton.x = ViewPort.HALF_WIDTH;
 		startButton.y = ViewPort.MAX_HEIGHT * .9;
 		addChild( startButton );

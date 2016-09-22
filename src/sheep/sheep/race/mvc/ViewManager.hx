@@ -1,4 +1,4 @@
-package sheep.sheep.race.managers;
+package sheep.sheep.race.mvc;
 import pixi.core.display.Container;
 
 /**
@@ -8,7 +8,7 @@ import pixi.core.display.Container;
 class ViewManager 
 {
 	var floatingViews:Array<Container>;
-	var currentView:Container;
+	var currentView(get, null):Container;
 	var stage(get, null):Container;
 
 	public function new(stage:Container) 
@@ -68,6 +68,11 @@ class ViewManager
 	public function get_stage():Container 
 	{
 		return stage;
+	}
+	
+	public function get_currentView():Container 
+	{
+		return currentView;
 	}
 	
 }
