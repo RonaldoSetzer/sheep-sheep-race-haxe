@@ -40,7 +40,6 @@ class SpriteFactory
 		return movieclip;
 	}
 	
-	
 	static public function getColorBox( width:Float, height:Float, color:Int = 0xFF0000, alpha:Float = 1.0 ):Graphics
 	{
 		var background:Graphics = new Graphics();
@@ -53,6 +52,11 @@ class SpriteFactory
 	static public function getBackgroundColor(color:Int = 0xFF0000, alpha:Float = 1.0):Graphics
 	{
 		return getColorBox( ViewPort.MAX_WIDTH, ViewPort.MAX_HEIGHT, color, alpha);
+	}
+	
+	static public function getShadowBackground():Graphics
+	{
+		return getBackgroundColor(0x000000, 0.7);
 	}
 	
 	static public function getBasicButton( text:String ):Button

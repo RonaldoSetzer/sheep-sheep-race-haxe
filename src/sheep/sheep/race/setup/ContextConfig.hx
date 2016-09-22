@@ -7,6 +7,7 @@ import sheep.sheep.race.mvc.FlowManager;
 import sheep.sheep.race.mvc.MediatorMap;
 import sheep.sheep.race.mvc.ViewManager;
 import sheep.sheep.race.mediators.HomeViewMediator;
+import sheep.sheep.race.views.BetPopup;
 import sheep.sheep.race.views.GameView;
 import sheep.sheep.race.views.HomeView;
 import sheep.sheep.race.views.IntroView;
@@ -29,12 +30,14 @@ class ContextConfig
 		mediatorMap.map(IntroView, IntroViewMediator);
 		mediatorMap.map(HomeView, HomeViewMediator);
 		mediatorMap.map(GameView, GameViewMediator);
+		mediatorMap.map(GameView, GameViewMediator);
 		
 		flowManager = new FlowManager( stage, mediatorMap );
 		
 		flowManager.mapSetView( FlowEvent.SHOW_INTRO, IntroView );
 		flowManager.mapSetView( FlowEvent.SHOW_HOME, HomeView );
 		flowManager.mapSetView( FlowEvent.SHOW_GAME, GameView );
+		flowManager.mapSetView( FlowEvent.ADD_BET_POPUP, BetPopup );
 		
 		init();
 	}

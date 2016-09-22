@@ -770,6 +770,10 @@ sheep_sheep_race_mediators_GameViewMediator.__name__ = ["sheep","sheep","race","
 sheep_sheep_race_mediators_GameViewMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
 sheep_sheep_race_mediators_GameViewMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
 	initialize: function() {
+		this.view.betButton.addListener("click",$bind(this,this.onClick));
+	}
+	,onClick: function() {
+		this.dispatcherEvent("addBetPopup");
 	}
 	,destroy: function() {
 		this.view.removeAllListeners();
@@ -951,10 +955,12 @@ var sheep_sheep_race_setup_ContextConfig = function(stage) {
 	this.mediatorMap.map(sheep_sheep_race_views_IntroView,sheep_sheep_race_mediators_IntroViewMediator);
 	this.mediatorMap.map(sheep_sheep_race_views_HomeView,sheep_sheep_race_mediators_HomeViewMediator);
 	this.mediatorMap.map(sheep_sheep_race_views_GameView,sheep_sheep_race_mediators_GameViewMediator);
+	this.mediatorMap.map(sheep_sheep_race_views_GameView,sheep_sheep_race_mediators_GameViewMediator);
 	this.flowManager = new sheep_sheep_race_mvc_FlowManager(stage,this.mediatorMap);
 	this.flowManager.mapSetView("showIntro",sheep_sheep_race_views_IntroView);
 	this.flowManager.mapSetView("showHome",sheep_sheep_race_views_HomeView);
 	this.flowManager.mapSetView("showGame",sheep_sheep_race_views_GameView);
+	this.flowManager.mapSetView("addBetPopup",sheep_sheep_race_views_BetPopup);
 	this.init();
 };
 sheep_sheep_race_setup_ContextConfig.__name__ = ["sheep","sheep","race","setup","ContextConfig"];
@@ -1017,6 +1023,9 @@ sheep_sheep_race_utils_SpriteFactory.getBackgroundColor = function(color,alpha) 
 	}
 	return sheep_sheep_race_utils_SpriteFactory.getColorBox(640,480,color,alpha);
 };
+sheep_sheep_race_utils_SpriteFactory.getShadowBackground = function() {
+	return sheep_sheep_race_utils_SpriteFactory.getBackgroundColor(0,0.7);
+};
 sheep_sheep_race_utils_SpriteFactory.getBasicButton = function(text) {
 	var img = new sheep_sheep_race_views_components_Button(text,PIXI.Texture.fromFrame("button_up.png"));
 	img.anchor.set(0.5);
@@ -1036,6 +1045,42 @@ sheep_sheep_race_utils_ViewPort.__name__ = ["sheep","sheep","race","utils","View
 sheep_sheep_race_utils_ViewPort.alignCenter = function(object) {
 	object.position.set(320,240);
 };
+var sheep_sheep_race_views_BetPopup = function() {
+	PIXI.Container.call(this);
+	this.addChild(sheep_sheep_race_utils_SpriteFactory.getShadowBackground());
+	var container = sheep_sheep_race_utils_SpriteFactory.getEmptyContainer();
+	container.x = 320;
+	container.y = 96.;
+	this.addChild(container);
+	container.addChild(sheep_sheep_race_utils_SpriteFactory.getColorBox(352.,336.,14596231));
+	var titleBackground = sheep_sheep_race_utils_SpriteFactory.getColorBox(320,30,13468991);
+	titleBackground.x = 15;
+	titleBackground.y = 15;
+	container.addChild(titleBackground);
+	var title = sheep_sheep_race_utils_SpriteFactory.getBitmapText("BET ON THE POSITIONS !!");
+	title.x = 32;
+	title.y = 22;
+	container.addChild(title);
+	var sheepSelectorFirst = new sheep_sheep_race_views_components_SheepSelector("FIRST\nPOSITION");
+	sheepSelectorFirst.x = container.width * 0.5 - 70;
+	sheepSelectorFirst.y = container.height * 0.5 - 20;
+	container.addChild(sheepSelectorFirst);
+	var sheepSelectorLast = new sheep_sheep_race_views_components_SheepSelector("LAST\nPOSITION");
+	sheepSelectorLast.x = container.width * 0.5 + 70;
+	sheepSelectorLast.y = container.height * 0.5 - 20;
+	sheepSelectorLast.back();
+	container.addChild(sheepSelectorLast);
+	var startButton = sheep_sheep_race_utils_SpriteFactory.getBasicButton("START");
+	startButton.x = container.width * 0.5;
+	startButton.y = container.height * 0.85;
+	container.addChild(startButton);
+	container.pivot.set(container.width * 0.5,0);
+};
+sheep_sheep_race_views_BetPopup.__name__ = ["sheep","sheep","race","views","BetPopup"];
+sheep_sheep_race_views_BetPopup.__super__ = PIXI.Container;
+sheep_sheep_race_views_BetPopup.prototype = $extend(PIXI.Container.prototype,{
+	__class__: sheep_sheep_race_views_BetPopup
+});
 var sheep_sheep_race_views_GameView = function() {
 	PIXI.Container.call(this);
 	this.addChild(sheep_sheep_race_utils_SpriteFactory.getBackgroundColor(3655644));
@@ -1061,10 +1106,10 @@ var sheep_sheep_race_views_GameView = function() {
 		sheeps[i].stop();
 		raceContent.addChild(sheeps[i]);
 	}
-	var betButton = sheep_sheep_race_utils_SpriteFactory.getBasicButton("BET");
-	betButton.x = 320;
-	betButton.y = 432.;
-	this.addChild(betButton);
+	this.betButton = sheep_sheep_race_utils_SpriteFactory.getBasicButton("BET");
+	this.betButton.x = 320;
+	this.betButton.y = 432.;
+	this.addChild(this.betButton);
 };
 sheep_sheep_race_views_GameView.__name__ = ["sheep","sheep","race","views","GameView"];
 sheep_sheep_race_views_GameView.__super__ = PIXI.Container;
@@ -1138,6 +1183,52 @@ sheep_sheep_race_views_components_Button.prototype = $extend(PIXI.Sprite.prototy
 	}
 	,__class__: sheep_sheep_race_views_components_Button
 });
+var sheep_sheep_race_views_components_SheepSelector = function(label) {
+	PIXI.Container.call(this);
+	this.indexes = [0,1,2,3];
+	var background1 = sheep_sheep_race_utils_SpriteFactory.getColorBox(86,72,0);
+	background1.pivot.x = background1.width * 0.5;
+	background1.pivot.y = background1.height * 0.5;
+	this.addChild(background1);
+	var background2 = sheep_sheep_race_utils_SpriteFactory.getColorBox(82,68,16777215);
+	background2.pivot.x = background2.width * 0.5;
+	background2.pivot.y = background2.height * 0.5;
+	this.addChild(background2);
+	this.image = sheep_sheep_race_utils_SpriteFactory.getSprite(sheep_sheep_race_info_AssetsInfo.SHEEPS_SELECTOR[0]);
+	this.image.pivot.x = this.image.width * 0.5;
+	this.image.pivot.y = this.image.height * 0.5;
+	this.addChild(this.image);
+	var text = sheep_sheep_race_utils_SpriteFactory.getBitmapText(label);
+	text.pivot.x = text.width * 0.5;
+	text.y = -75;
+	this.addChild(text);
+	var backButton = sheep_sheep_race_utils_SpriteFactory.getArrowButton("left");
+	backButton.x = -22;
+	backButton.y = 60;
+	this.addChild(backButton);
+	var nextButton = sheep_sheep_race_utils_SpriteFactory.getArrowButton("right");
+	nextButton.x = 22;
+	nextButton.y = 60;
+	this.addChild(nextButton);
+	backButton.on("click",$bind(this,this.back));
+	nextButton.on("click",$bind(this,this.next));
+};
+sheep_sheep_race_views_components_SheepSelector.__name__ = ["sheep","sheep","race","views","components","SheepSelector"];
+sheep_sheep_race_views_components_SheepSelector.__super__ = PIXI.Container;
+sheep_sheep_race_views_components_SheepSelector.prototype = $extend(PIXI.Container.prototype,{
+	updateImage: function(index) {
+		this.image.texture = PIXI.Texture.fromFrame(sheep_sheep_race_info_AssetsInfo.SHEEPS_SELECTOR[index]);
+	}
+	,next: function() {
+		this.indexes.push(this.indexes.shift());
+		this.updateImage(this.indexes[0]);
+	}
+	,back: function() {
+		this.indexes.unshift(this.indexes.pop());
+		this.updateImage(this.indexes[0]);
+	}
+	,__class__: sheep_sheep_race_views_components_SheepSelector
+});
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 String.prototype.__class__ = String;
@@ -1179,6 +1270,7 @@ js_Boot.__toStr = { }.toString;
 sheep_sheep_race_events_FlowEvent.SHOW_HOME = "showHome";
 sheep_sheep_race_events_FlowEvent.SHOW_GAME = "showGame";
 sheep_sheep_race_events_FlowEvent.SHOW_INTRO = "showIntro";
+sheep_sheep_race_events_FlowEvent.ADD_BET_POPUP = "addBetPopup";
 sheep_sheep_race_info_AssetsInfo.FONT = "20px SetzerPixelFont";
 sheep_sheep_race_info_AssetsInfo.SHEEP_LOGO = "sheep_logo.png";
 sheep_sheep_race_info_AssetsInfo.BACKGROUND_GAME = "background_game.png";
@@ -1190,12 +1282,18 @@ sheep_sheep_race_info_AssetsInfo.SHEEP_01 = ["basic_sheep_01.png","basic_sheep_0
 sheep_sheep_race_info_AssetsInfo.SHEEP_02 = ["basic_f_sheep_01.png","basic_f_sheep_02.png","basic_f_sheep_03.png","basic_f_sheep_04.png"];
 sheep_sheep_race_info_AssetsInfo.SHEEP_03 = ["brown_sheep_01.png","brown_sheep_02.png","brown_sheep_03.png","brown_sheep_04.png"];
 sheep_sheep_race_info_AssetsInfo.SHEEP_04 = ["dolly_sheep_01.png","dolly_sheep_02.png","dolly_sheep_03.png","dolly_sheep_04.png"];
+sheep_sheep_race_info_AssetsInfo.SHEEPS_SELECTOR = ["basic_sheep_01.png","basic_f_sheep_01.png","brown_sheep_01.png","dolly_sheep_01.png"];
 sheep_sheep_race_info_ColorInfo.BACKGROUND_SKY = 3655644;
+sheep_sheep_race_info_ColorInfo.BACKGROUND_TITLE = 13468991;
+sheep_sheep_race_info_ColorInfo.BACKGROUND_POPUP = 14596231;
 sheep_sheep_race_info_TextInfo.DEVELOPER = "RONALDO SANTIAGO";
 sheep_sheep_race_info_TextInfo.BUTTON_START = "START";
 sheep_sheep_race_info_TextInfo.BUTTON_BET = "BET";
 sheep_sheep_race_info_TextInfo.LEFT = "left";
 sheep_sheep_race_info_TextInfo.RIGHT = "right";
+sheep_sheep_race_info_TextInfo.TITLE_BET = "BET ON THE POSITIONS !!";
+sheep_sheep_race_info_TextInfo.FIRST_POSITION = "FIRST\nPOSITION";
+sheep_sheep_race_info_TextInfo.LAST_POSITION = "LAST\nPOSITION";
 sheep_sheep_race_utils_ViewPort.MAX_WIDTH = 640;
 sheep_sheep_race_utils_ViewPort.MAX_HEIGHT = 480;
 sheep_sheep_race_utils_ViewPort.HALF_WIDTH = 320;

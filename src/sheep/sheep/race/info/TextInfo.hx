@@ -13,4 +13,9 @@ class TextInfo
 	
 	static public inline var LEFT:String = "left";
 	static public inline var RIGHT:String = "right";
+	
+	static public inline var TITLE_BET:String = "BET ON THE POSITIONS !!";
+	
+	static public inline var FIRST_POSITION:String = "FIRST\nPOSITION";
+	static public inline var LAST_POSITION:String = "LAST\nPOSITION";
 }

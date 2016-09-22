@@ -16,6 +16,7 @@ import sheep.sheep.race.views.components.Button;
  */
 class GameView extends Container 
 {
+	public var betButton:Button;
 
 	public function new() 
 	{
@@ -54,7 +55,7 @@ class GameView extends Container
 			raceContent.addChild( sheeps[i] );
 		}
 		
-		var betButton:Button = SpriteFactory.getBasicButton( TextInfo.BUTTON_BET );
+		betButton = SpriteFactory.getBasicButton( TextInfo.BUTTON_BET );
 		betButton.x = ViewPort.HALF_WIDTH;
 		betButton.y = ViewPort.MAX_HEIGHT * .9;
 		addChild( betButton );

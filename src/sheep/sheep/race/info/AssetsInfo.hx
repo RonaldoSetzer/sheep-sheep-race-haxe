@@ -24,6 +24,8 @@ class AssetsInfo
 	static public var SHEEP_03:Array<String> = ["brown_sheep_01.png", "brown_sheep_02.png", "brown_sheep_03.png", "brown_sheep_04.png"];
 	static public var SHEEP_04:Array<String> = ["dolly_sheep_01.png", "dolly_sheep_02.png", "dolly_sheep_03.png", "dolly_sheep_04.png"];
 	
+	static public var SHEEPS_SELECTOR:Array<String> = ["basic_sheep_01.png", "basic_f_sheep_01.png", "brown_sheep_01.png", "dolly_sheep_01.png"];
+	
 	
 
 }
