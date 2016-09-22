@@ -50,7 +50,6 @@ class ViewManager
 		removeLastView();
 		
 		currentView = view;
-		
 		stage.addChild(currentView);
 		
 		return currentView;
@@ -60,7 +59,7 @@ class ViewManager
 	{
 		if (stage != null && currentView != null)
 		{
-			removeView(currentView);
+			stage.removeChild(currentView);
 		}
 	}	
 	

@@ -33,6 +33,12 @@ class FlowManager
 		stage.on(event, onSetView);
 	}
 	
+	public function mapAddView(event:String, view:Class<Dynamic>) 
+	{
+		mapEvents.set(event, view);
+		stage.on(event, onAddView);
+	}
+	
 	private function onSetView(type:Dynamic) 
 	{
 		mediatorMap.unmediate(viewManager.get_currentView());
@@ -40,6 +46,17 @@ class FlowManager
 		var viewClass:Class<Dynamic> = mapEvents.get(type);
 		var view:Container = Type.createInstance(viewClass,[]);
 		viewManager.setView(view);
+		
+		mediatorMap.mediate( viewClass, view );
+	}
+	
+	private function onAddView(type:Dynamic) 
+	{
+		mediatorMap.unmediate(viewManager.get_currentView());
+		
+		var viewClass:Class<Dynamic> = mapEvents.get(type);
+		var view:Container = Type.createInstance(viewClass,[]);
+		viewManager.addView(view);
 		
 		mediatorMap.mediate( viewClass, view );
 	}	
