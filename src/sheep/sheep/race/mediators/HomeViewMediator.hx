@@ -13,16 +13,21 @@ class HomeViewMediator extends AbstractMediator
 {
 	var view:HomeView;
 	
+	public function new(view:Container) 
+	{
+		super(view);
+		
+		this.view = cast(viewComponent, HomeView);
+	}
+	
 	override public function initialize() 
 	{
-		trace("HOME INITALIZE");
-		view = cast(viewComponent, HomeView);
 		view.startButton.addListener("click", onClick );
 	}
 	
 	function onClick() 
 	{
-		view.parent.emit(FlowEvent.SHOW_GAME, FlowEvent.SHOW_GAME);
+		dispatcherEvent(FlowEvent.SHOW_GAME);
 	}
 
 	override public function destroy() 
@@ -30,4 +35,5 @@ class HomeViewMediator extends AbstractMediator
 		trace("HOME DESTROY");
 		view.removeAllListeners();
 	}
+	
 }

@@ -23,5 +23,10 @@ class AbstractMediator
 	{
 		
 	}
-		
+
+	function dispatcherEvent( event:String )
+	{
+		viewComponent.parent.emit(event, event);
+	}
+	
 }

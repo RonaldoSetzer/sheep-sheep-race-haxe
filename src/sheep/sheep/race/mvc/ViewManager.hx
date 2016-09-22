@@ -43,7 +43,6 @@ class ViewManager
 		{
 			removeView( floatingViews[i] );
 		}
-		
 	}
 	
 	public function setView( view:Container ):Container
