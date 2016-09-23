@@ -2,6 +2,7 @@ package sheep.sheep.race.setup;
 import pixi.core.display.Container;
 import sheep.sheep.race.events.FlowEvent;
 import sheep.sheep.race.managers.GameManager;
+import sheep.sheep.race.managers.SoundManager;
 import sheep.sheep.race.mediators.AlertPopupMediator;
 import sheep.sheep.race.mediators.BetFeedbackPopupMediator;
 import sheep.sheep.race.mediators.BetPopupMediator;
@@ -43,6 +44,7 @@ class ContextConfig
 		Repository.mapAsSingleton(GameModel);
 		Repository.mapAsSingleton(GameService);
 		Repository.mapAsSingleton(FlowService);
+		Repository.mapAsSingleton(SoundManager);
 		Repository.mapAsSingleton(GameManager);
 		
 		mediatorMap = new MediatorMap();

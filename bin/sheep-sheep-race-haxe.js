@@ -6,6 +6,21 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var EReg = function(r,opt) {
+	this.r = new RegExp(r,opt.split("u").join(""));
+};
+EReg.__name__ = ["EReg"];
+EReg.prototype = {
+	match: function(s) {
+		if(this.r.global) {
+			this.r.lastIndex = 0;
+		}
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,__class__: EReg
+};
 var pixi_plugins_app_Application = function() {
 	this._animationFrameId = null;
 	this.pixelRatio = 1;
@@ -405,6 +420,18 @@ Reflect.field = function(o,field) {
 		return null;
 	}
 };
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) {
+			a.push(f);
+		}
+		}
+	}
+	return a;
+};
 var Std = function() { };
 Std.__name__ = ["Std"];
 Std.string = function(s) {
@@ -456,6 +483,195 @@ Type.createInstance = function(cl,args) {
 		throw new js__$Boot_HaxeError("Too many arguments");
 	}
 };
+var core_AssetLoader = function() {
+	PIXI.loaders.Loader.call(this);
+	this.count = 0;
+	this.pixelRatio = 1;
+	this._audioAssets = new haxe_ds_StringMap();
+	core_MultipackParser.loader = this;
+	this["use"](core_MultipackParser.parse);
+};
+core_AssetLoader.__name__ = ["core","AssetLoader"];
+core_AssetLoader.__super__ = PIXI.loaders.Loader;
+core_AssetLoader.prototype = $extend(PIXI.loaders.Loader.prototype,{
+	start: function(onComplete,onProgress) {
+		this.load(onComplete);
+		if(this.progress != null) {
+			this.on("progress",onProgress);
+		}
+	}
+	,addAudioAsset: function(id,path,onAssetLoaded) {
+		this.addAsset(id,path,false,onAssetLoaded);
+	}
+	,addAsset: function(id,path,usePixelRatio,onAssetLoaded) {
+		if(usePixelRatio == null) {
+			usePixelRatio = true;
+		}
+		if(Reflect.field(this.resources,id) == null) {
+			if(path != "") {
+				this.add(id,path,{ loadType : this._getLoadtype(path)},onAssetLoaded);
+				this.count++;
+			}
+		}
+	}
+	,getUrl: function(id) {
+		if(Reflect.field(this.resources,id) != null) {
+			return Reflect.field(this.resources,id).url;
+		} else {
+			return null;
+		}
+	}
+	,getJson: function(id) {
+		var resource = Reflect.field(this.resources,id);
+		if(resource != null && new EReg("(json|text|txt)","i").match(resource.xhrType)) {
+			return resource.data;
+		}
+		return null;
+	}
+	,getTexture: function(id) {
+		var resource = Reflect.field(this.resources,id);
+		if(resource != null && resource.texture != null) {
+			return resource.texture;
+		}
+		return null;
+	}
+	,getTextureFromSpritesheet: function(id,frame) {
+		var resource = Reflect.field(this.resources,id);
+		if(resource != null && resource.isJson && resource.textures != null) {
+			var texture = Reflect.field(resource.textures,frame);
+			if(texture != null) {
+				return texture;
+			}
+		}
+		return null;
+	}
+	,exists: function(id) {
+		return Reflect.field(this.resources,id) != null;
+	}
+	,getAudio: function(id) {
+		var _this = this._audioAssets;
+		if((__map_reserved[id] != null?_this.getReserved(id):_this.h[id]) == null) {
+			var value = new core_AudioAsset(Reflect.field(this.resources,id).data);
+			var _this1 = this._audioAssets;
+			if(__map_reserved[id] != null) {
+				_this1.setReserved(id,value);
+			} else {
+				_this1.h[id] = value;
+			}
+		}
+		var _this2 = this._audioAssets;
+		return __map_reserved[id] != null?_this2.getReserved(id):_this2.h[id];
+	}
+	,getResource: function(id) {
+		return Reflect.field(this.resources,id);
+	}
+	,reset: function() {
+		this.removeAllListeners();
+		this.count = 0;
+		this.resources = { };
+		PIXI.loaders.Loader.prototype.reset.call(this);
+	}
+	,getResoultionPath: function() {
+		if(this.resolution != null) {
+			return this.resolution + "/";
+		} else {
+			return "";
+		}
+	}
+	,getPixelRatioPath: function(val) {
+		if(val != null) {
+			return "scale-" + val + "/";
+		} else {
+			return "scale-" + this.pixelRatio + "/";
+		}
+	}
+	,set_mute: function(val) {
+		var _this = this._audioAssets;
+		var tmp = new haxe_ds__$StringMap_StringMapIterator(_this,_this.arrayKeys());
+		while(tmp.hasNext()) tmp.next().mute = val;
+		return this.mute = val;
+	}
+	,_getLoadtype: function(asset) {
+		if(new EReg("(.png|.gif|.svg|.jpg|.jpeg|.bmp)","i").match(asset)) {
+			return 2;
+		} else if(new EReg("(.mp3|.wav|.ogg|.aac|.m4a|.oga|.webma)","i").match(asset)) {
+			return 3;
+		} else if(new EReg("(.mp4|.webm|.m3u8)","i").match(asset)) {
+			return 4;
+		}
+		return 1;
+	}
+	,__class__: core_AssetLoader
+});
+var core_AudioAsset = function(src) {
+	this._src = src;
+	this.mute = false;
+	this.set_loop(false);
+};
+core_AudioAsset.__name__ = ["core","AudioAsset"];
+core_AudioAsset.prototype = {
+	play: function() {
+		if(!this.mute) {
+			this._src.play();
+		}
+	}
+	,stop: function() {
+		this._src.pause();
+	}
+	,set_loop: function(val) {
+		this._src.loop = val;
+		return this.loop = val;
+	}
+	,__class__: core_AudioAsset
+};
+var core_MultipackParser = function() { };
+core_MultipackParser.__name__ = ["core","MultipackParser"];
+core_MultipackParser.parse = function(resource,next) {
+	var data = resource.data;
+	if(data != null && data.multipack) {
+		var textures = data.textures;
+		var resolution = PIXI.utils.getResolutionOfUrl(resource.url);
+		var baseURL = resource.url.split(core_MultipackParser.loader.baseUrl)[1];
+		baseURL = baseURL.substring(0,baseURL.lastIndexOf("/") + 1);
+		var _g = 0;
+		while(_g < textures.length) {
+			var texture = [textures[_g]];
+			++_g;
+			var url = baseURL + texture[0].meta.image;
+			var tmp = (function(texture1) {
+				return function(image) {
+					var frames = texture1[0].frames;
+					var _g1 = 0;
+					var _g2 = Reflect.fields(frames);
+					while(_g1 < _g2.length) {
+						var n = _g2[_g1];
+						++_g1;
+						var frameData = Reflect.field(frames,n);
+						var rect = frameData.frame;
+						if(rect != null) {
+							var size = new PIXI.Rectangle(rect.x,rect.y,rect.w,rect.h);
+							var trim = null;
+							if(frameData.trimmed) {
+								var actualSize = frameData.sourceSize;
+								var realSize = frameData.spriteSourceSize;
+								trim = new PIXI.Rectangle(realSize.x / resolution,realSize.y / resolution,actualSize.w / resolution,actualSize.h / resolution);
+							}
+							size.x /= resolution;
+							size.y /= resolution;
+							size.width /= resolution;
+							size.height /= resolution;
+							PIXI.Texture.addTextureToCache(new PIXI.Texture(image.texture.baseTexture,size,size.clone(),trim),n);
+						}
+					}
+				};
+			})(texture);
+			core_MultipackParser.loader.add(texture[0].meta.image,url,{ loadType : 2, crossOrigin : resource.crossOrigin},tmp);
+		}
+		next();
+	} else {
+		next();
+	}
+};
 var haxe_IMap = function() { };
 haxe_IMap.__name__ = ["haxe","IMap"];
 var haxe_Timer = function(time_ms) {
@@ -476,6 +692,28 @@ haxe_Timer.prototype = {
 	,run: function() {
 	}
 	,__class__: haxe_Timer
+};
+var haxe_ds__$StringMap_StringMapIterator = function(map,keys) {
+	this.map = map;
+	this.keys = keys;
+	this.index = 0;
+	this.count = keys.length;
+};
+haxe_ds__$StringMap_StringMapIterator.__name__ = ["haxe","ds","_StringMap","StringMapIterator"];
+haxe_ds__$StringMap_StringMapIterator.prototype = {
+	hasNext: function() {
+		return this.index < this.count;
+	}
+	,next: function() {
+		var _this = this.map;
+		var key = this.keys[this.index++];
+		if(__map_reserved[key] != null) {
+			return _this.getReserved(key);
+		} else {
+			return _this.h[key];
+		}
+	}
+	,__class__: haxe_ds__$StringMap_StringMapIterator
 };
 var haxe_ds_StringMap = function() {
 	this.h = { };
@@ -511,6 +749,22 @@ haxe_ds_StringMap.prototype = {
 			delete(this.h[key]);
 			return true;
 		}
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) {
+			out.push(key);
+		}
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) {
+				out.push(key.substr(1));
+			}
+			}
+		}
+		return out;
 	}
 	,__class__: haxe_ds_StringMap
 };
@@ -748,6 +1002,8 @@ var sheep_sheep_race_info_AssetsInfo = function() { };
 sheep_sheep_race_info_AssetsInfo.__name__ = ["sheep","sheep","race","info","AssetsInfo"];
 var sheep_sheep_race_info_ColorInfo = function() { };
 sheep_sheep_race_info_ColorInfo.__name__ = ["sheep","sheep","race","info","ColorInfo"];
+var sheep_sheep_race_info_SoundInfo = function() { };
+sheep_sheep_race_info_SoundInfo.__name__ = ["sheep","sheep","race","info","SoundInfo"];
 var sheep_sheep_race_info_TextInfo = function() { };
 sheep_sheep_race_info_TextInfo.__name__ = ["sheep","sheep","race","info","TextInfo"];
 var sheep_sheep_race_managers_GameManager = function() {
@@ -775,6 +1031,46 @@ sheep_sheep_race_managers_GameManager.prototype = {
 		}
 	}
 	,__class__: sheep_sheep_race_managers_GameManager
+};
+var sheep_sheep_race_managers_SoundManager = function() {
+	this.map = new haxe_ds_StringMap();
+	this.loader = new core_AssetLoader();
+	this.loader.baseUrl = "assets/sounds/";
+	this.loader.addAsset("overworld","music_overworld.mp3",false,null);
+	this.loader.addAsset("youLose","sfx_you_lose.mp3",false,null);
+	this.loader.addAsset("youWin","sfx_you_win.mp3",false,null);
+	this.loader.start($bind(this,this.onLoaded));
+};
+sheep_sheep_race_managers_SoundManager.__name__ = ["sheep","sheep","race","managers","SoundManager"];
+sheep_sheep_race_managers_SoundManager.prototype = {
+	onLoaded: function() {
+		this.overworld = this.loader.getAudio("overworld");
+		this.overworld.set_loop(true);
+		this.overworld.play();
+		var value = this.loader.getAudio("youLose");
+		var _this = this.map;
+		if(__map_reserved.youLose != null) {
+			_this.setReserved("youLose",value);
+		} else {
+			_this.h["youLose"] = value;
+		}
+		var value1 = this.loader.getAudio("youWin");
+		var _this1 = this.map;
+		if(__map_reserved.youWin != null) {
+			_this1.setReserved("youWin",value1);
+		} else {
+			_this1.h["youWin"] = value1;
+		}
+	}
+	,playSFX: function(key) {
+		var _this = this.map;
+		if((__map_reserved[key] != null?_this.getReserved(key):_this.h[key]) == null) {
+			return;
+		}
+		var _this1 = this.map;
+		(__map_reserved[key] != null?_this1.getReserved(key):_this1.h[key]).play();
+	}
+	,__class__: sheep_sheep_race_managers_SoundManager
 };
 var sheep_sheep_race_mvc_AbstractMediator = function(view) {
 	this.viewComponent = view;
@@ -821,6 +1117,7 @@ var sheep_sheep_race_mediators_BetFeedbackPopupMediator = function(view) {
 	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_BetFeedbackPopup);
 	this.gameModel = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_models_GameModel);
 	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
+	this.soundManager = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_managers_SoundManager);
 };
 sheep_sheep_race_mediators_BetFeedbackPopupMediator.__name__ = ["sheep","sheep","race","mediators","BetFeedbackPopupMediator"];
 sheep_sheep_race_mediators_BetFeedbackPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
@@ -829,6 +1126,27 @@ sheep_sheep_race_mediators_BetFeedbackPopupMediator.prototype = $extend(sheep_sh
 		this.view.createPodium(this.gameModel);
 		this.view.homeButton.addListener("click",$bind(this,this.onHome));
 		this.view.retryButton.addListener("click",$bind(this,this.onRetry));
+		this.count = 0;
+		this.timer = new haxe_Timer(200);
+		this.timer.run = $bind(this,this.onSfxPlaY);
+		this.soundManager.playSFX("youLose");
+	}
+	,onSfxPlaY: function() {
+		if(this.count == 0 && this.gameModel.youWonTheFirstPosition()) {
+			this.soundManager.playSFX("youWin");
+		} else if(this.count == 0) {
+			this.soundManager.playSFX("youLose");
+		} else if(this.gameModel.youWonTheLastPosition()) {
+			this.soundManager.playSFX("youWin");
+		} else {
+			this.soundManager.playSFX("youLose");
+		}
+		this.count += 1;
+		if(this.count < 2) {
+			return;
+		}
+		this.timer.stop();
+		this.timer = null;
 	}
 	,onRetry: function() {
 		this.flowService.setGameView();
@@ -1298,6 +1616,7 @@ var sheep_sheep_race_setup_ContextConfig = function(stage) {
 	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_models_GameModel);
 	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_services_GameService);
 	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_services_FlowService);
+	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_managers_SoundManager);
 	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_managers_GameManager);
 	this.mediatorMap = new sheep_sheep_race_mvc_MediatorMap();
 	this.mediatorMap.map(sheep_sheep_race_views_IntroView,sheep_sheep_race_mediators_IntroViewMediator);
@@ -1809,6 +2128,7 @@ Perf.TOP_RIGHT = "TR";
 Perf.BOTTOM_LEFT = "BL";
 Perf.BOTTOM_RIGHT = "BR";
 Perf.DELAY_TIME = 4000;
+core_AssetLoader.__meta__ = { fields : { getJson : { SuppressWarnings : ["checkstyle:Dynamic"]}}};
 js_Boot.__toStr = { }.toString;
 sheep_sheep_race_events_FlowEvent.SHOW_HOME = "showHome";
 sheep_sheep_race_events_FlowEvent.SHOW_GAME = "showGame";
@@ -1838,6 +2158,9 @@ sheep_sheep_race_info_ColorInfo.BACKGROUND_POPUP = 14596231;
 sheep_sheep_race_info_ColorInfo.GREEN = 8827908;
 sheep_sheep_race_info_ColorInfo.RED = 9046024;
 sheep_sheep_race_info_ColorInfo.YELLOW = 13403648;
+sheep_sheep_race_info_SoundInfo.OVERWORLD = "overworld";
+sheep_sheep_race_info_SoundInfo.YOU_LOSE = "youLose";
+sheep_sheep_race_info_SoundInfo.YOU_WIN = "youWin";
 sheep_sheep_race_info_TextInfo.DEVELOPER = "RONALDO SANTIAGO";
 sheep_sheep_race_info_TextInfo.BUTTON_START = "START";
 sheep_sheep_race_info_TextInfo.BUTTON_BET = "BET";
@@ -1864,5 +2187,3 @@ sheep_sheep_race_utils_ViewPort.HALF_WIDTH = 320;
 sheep_sheep_race_utils_ViewPort.HALF_HEIGHT = 240;
 Main.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
-
-//# sourceMappingURL=sheep-sheep-race-haxe.js.map
