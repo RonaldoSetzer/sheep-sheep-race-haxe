@@ -1,0 +1,188 @@
+{"frames": {
+
+"background_game.png":
+{
+	"frame": {"x":1,"y":1,"w":640,"h":480},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":640,"h":480},
+	"sourceSize": {"w":640,"h":480}
+},
+"basic_f_sheep_01.png":
+{
+	"frame": {"x":841,"y":343,"w":56,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":7,"w":56,"h":47},
+	"sourceSize": {"w":62,"h":54}
+},
+"basic_f_sheep_02.png":
+{
+	"frame": {"x":835,"y":206,"w":62,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":9,"w":62,"h":42},
+	"sourceSize": {"w":62,"h":54}
+},
+"basic_f_sheep_03.png":
+{
+	"frame": {"x":655,"y":268,"w":56,"h":51},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":56,"h":51},
+	"sourceSize": {"w":62,"h":54}
+},
+"basic_f_sheep_04.png":
+{
+	"frame": {"x":713,"y":388,"w":62,"h":49},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":5,"w":62,"h":49},
+	"sourceSize": {"w":62,"h":54}
+},
+"basic_sheep_01.png":
+{
+	"frame": {"x":777,"y":357,"w":56,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":7,"w":56,"h":47},
+	"sourceSize": {"w":62,"h":54}
+},
+"basic_sheep_02.png":
+{
+	"frame": {"x":835,"y":250,"w":62,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":9,"w":62,"h":42},
+	"sourceSize": {"w":62,"h":54}
+},
+"basic_sheep_03.png":
+{
+	"frame": {"x":655,"y":321,"w":56,"h":51},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":56,"h":51},
+	"sourceSize": {"w":62,"h":54}
+},
+"basic_sheep_04.png":
+{
+	"frame": {"x":777,"y":308,"w":62,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":7,"w":62,"h":47},
+	"sourceSize": {"w":62,"h":54}
+},
+"brown_sheep_01.png":
+{
+	"frame": {"x":899,"y":343,"w":56,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":7,"w":56,"h":47},
+	"sourceSize": {"w":62,"h":54}
+},
+"brown_sheep_02.png":
+{
+	"frame": {"x":899,"y":206,"w":61,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":9,"w":61,"h":42},
+	"sourceSize": {"w":62,"h":54}
+},
+"brown_sheep_03.png":
+{
+	"frame": {"x":655,"y":374,"w":56,"h":51},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":56,"h":51},
+	"sourceSize": {"w":62,"h":54}
+},
+"brown_sheep_04.png":
+{
+	"frame": {"x":771,"y":206,"w":62,"h":49},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":5,"w":62,"h":49},
+	"sourceSize": {"w":62,"h":54}
+},
+"button_arrow_up.png":
+{
+	"frame": {"x":901,"y":294,"w":40,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":38},
+	"sourceSize": {"w":40,"h":38}
+},
+"button_up.png":
+{
+	"frame": {"x":643,"y":206,"w":94,"h":60},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":94,"h":60},
+	"sourceSize": {"w":94,"h":60}
+},
+"dolly_sheep_01.png":
+{
+	"frame": {"x":841,"y":294,"w":58,"h":47},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":7,"w":58,"h":47},
+	"sourceSize": {"w":62,"h":54}
+},
+"dolly_sheep_02.png":
+{
+	"frame": {"x":899,"y":250,"w":61,"h":42},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":9,"w":61,"h":42},
+	"sourceSize": {"w":62,"h":54}
+},
+"dolly_sheep_03.png":
+{
+	"frame": {"x":655,"y":427,"w":56,"h":51},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":56,"h":51},
+	"sourceSize": {"w":62,"h":54}
+},
+"dolly_sheep_04.png":
+{
+	"frame": {"x":771,"y":257,"w":62,"h":49},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":5,"w":62,"h":49},
+	"sourceSize": {"w":62,"h":54}
+},
+"finish_mark.png":
+{
+	"frame": {"x":739,"y":206,"w":30,"h":180},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":180},
+	"sourceSize": {"w":30,"h":180}
+},
+"sheep_logo.png":
+{
+	"frame": {"x":643,"y":1,"w":344,"h":203},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":344,"h":203},
+	"sourceSize": {"w":344,"h":203}
+},
+"start_mark.png":
+{
+	"frame": {"x":643,"y":268,"w":10,"h":180},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":180},
+	"sourceSize": {"w":10,"h":180}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "sheep_spritesheet.png",
+	"format": "RGBA8888",
+	"size": {"w":988,"h":482},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:fbce4e54944da1f04ecd3172dccd5e55:139107e1044aee52bd920728d6d844ed:e855de282fc04172eab05686665d8fdb$"
+}
+}

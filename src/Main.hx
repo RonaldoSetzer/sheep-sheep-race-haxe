@@ -26,6 +26,9 @@ class Main extends Application
 	function init() 
 	{
 		backgroundColor = 0xFFFFFF;
+		autoResize = false;
+		width = 640;
+		height = 480;
 		super.start( Application.AUTO );
 	 		
 		var loader:Loader = new Loader();
