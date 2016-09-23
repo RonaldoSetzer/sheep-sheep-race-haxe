@@ -1,8 +1,9 @@
 package sheep.sheep.race.mediators;
+
 import pixi.core.display.Container;
-import sheep.sheep.race.events.FlowEvent;
 import sheep.sheep.race.mvc.AbstractMediator;
-import sheep.sheep.race.views.GameView;
+import sheep.sheep.race.mvc.Repository;
+import sheep.sheep.race.services.FlowService;
 import sheep.sheep.race.views.HomeView;
 
 /**
@@ -12,12 +13,14 @@ import sheep.sheep.race.views.HomeView;
 class HomeViewMediator extends AbstractMediator
 {
 	var view:HomeView;
+	var flowService:FlowService;
 	
 	public function new(view:Container) 
 	{
 		super(view);
 		
 		this.view = cast(viewComponent, HomeView);
+		flowService = Repository.getInstanceOf(FlowService);
 	}
 	
 	override public function initialize() 
@@ -27,12 +30,11 @@ class HomeViewMediator extends AbstractMediator
 	
 	function onClick() 
 	{
-		dispatcherEvent(FlowEvent.SHOW_GAME);
+		flowService.setGameView();
 	}
 
 	override public function destroy() 
 	{
-		trace("HOME DESTROY");
 		view.removeAllListeners();
 	}
 	

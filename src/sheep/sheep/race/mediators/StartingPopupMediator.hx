@@ -2,6 +2,7 @@ package sheep.sheep.race.mediators;
 import haxe.Timer;
 import pixi.core.display.Container;
 import sheep.sheep.race.events.FlowEvent;
+import sheep.sheep.race.events.GameEvent;
 import sheep.sheep.race.mvc.AbstractMediator;
 import sheep.sheep.race.views.StartingPopup;
 
@@ -40,7 +41,7 @@ class StartingPopupMediator extends AbstractMediator
 	
 	override public function destroy() 
 	{
-		//dispatcherEvent(GameEvent.START);
+		dispatcherEvent(GameEvent.START);
 	}
 	
 }

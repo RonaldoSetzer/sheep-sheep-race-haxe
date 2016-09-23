@@ -1,9 +1,12 @@
 package sheep.sheep.race.mediators;
-
 import pixi.core.display.Container;
-import sheep.sheep.race.events.FlowEvent;
+import sheep.sheep.race.models.GameModel;
 import sheep.sheep.race.mvc.AbstractMediator;
+import sheep.sheep.race.mvc.Repository;
+import sheep.sheep.race.services.FlowService;
 import sheep.sheep.race.views.BetPopup;
+
+
 
 /**
  * ...
@@ -12,12 +15,16 @@ import sheep.sheep.race.views.BetPopup;
 class BetPopupMediator extends AbstractMediator 
 {
 	var view:BetPopup;
+	var gameModel:GameModel;
+	var flowService:FlowService;
 
 	public function new(view:Container) 
 	{
 		super(view);
 		
 		this.view = cast(viewComponent, BetPopup);
+		gameModel = Repository.getInstanceOf(GameModel);
+		flowService = Repository.getInstanceOf(FlowService);
 	}
 	
 	override public function initialize() 
@@ -29,18 +36,21 @@ class BetPopupMediator extends AbstractMediator
 	{
 		var yourBetToFirstPosition:Int = view.sheepSelectorFirst.getCurrentIndex();
 		var yourBetToLastPosition:Int = view.sheepSelectorLast.getCurrentIndex();
+		
 		if ( yourBetToFirstPosition == yourBetToLastPosition )
 		{
-			dispatcherEvent(FlowEvent.ADD_ALERT_POPUP);
+			flowService.addAlertPopup();
 			return;
 		}
-		dispatcherEvent(FlowEvent.REMOVE_LAST_FLOATING_VIEW);
+		gameModel.yourBetToFirstPosition = yourBetToFirstPosition;
+		gameModel.yourBetToLastPosition = yourBetToLastPosition;
+		
+		flowService.removeLastFloatingView();
 	}
 	
 	override public function destroy() 
 	{
-		trace("DESTROY?");
-		dispatcherEvent(FlowEvent.ADD_STARTING_POPUP);
+		flowService.addStartingPopup();
 	}
 	
 	

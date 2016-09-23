@@ -742,14 +742,43 @@ sheep_sheep_race_assets_Assets.getTextures = function(list) {
 };
 var sheep_sheep_race_events_FlowEvent = function() { };
 sheep_sheep_race_events_FlowEvent.__name__ = ["sheep","sheep","race","events","FlowEvent"];
+var sheep_sheep_race_events_GameEvent = function() { };
+sheep_sheep_race_events_GameEvent.__name__ = ["sheep","sheep","race","events","GameEvent"];
 var sheep_sheep_race_info_AssetsInfo = function() { };
 sheep_sheep_race_info_AssetsInfo.__name__ = ["sheep","sheep","race","info","AssetsInfo"];
 var sheep_sheep_race_info_ColorInfo = function() { };
 sheep_sheep_race_info_ColorInfo.__name__ = ["sheep","sheep","race","info","ColorInfo"];
 var sheep_sheep_race_info_TextInfo = function() { };
 sheep_sheep_race_info_TextInfo.__name__ = ["sheep","sheep","race","info","TextInfo"];
+var sheep_sheep_race_managers_GameManager = function() {
+	this.gameModel = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_models_GameModel);
+	this.gameService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_GameService);
+};
+sheep_sheep_race_managers_GameManager.__name__ = ["sheep","sheep","race","managers","GameManager"];
+sheep_sheep_race_managers_GameManager.prototype = {
+	updateRace: function() {
+		var speeds = [1,2,3,4];
+		var speed;
+		var _g1 = 0;
+		var _g = this.gameModel.distances.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			speed = speeds[Math.floor(Math.random() * speeds.length)];
+			this.gameModel.distances[i] += speed;
+			if(this.gameModel.distances[i] >= 500) {
+				this.gameModel.addRacePosition(i);
+			}
+			if(this.gameModel.isTheRaceFinished()) {
+				this.gameService.finish();
+				return;
+			}
+		}
+	}
+	,__class__: sheep_sheep_race_managers_GameManager
+};
 var sheep_sheep_race_mvc_AbstractMediator = function(view) {
 	this.viewComponent = view;
+	this.dispatcher = sheep_sheep_race_mvc_Repository.getInstanceOf(PIXI.Container);
 };
 sheep_sheep_race_mvc_AbstractMediator.__name__ = ["sheep","sheep","race","mvc","AbstractMediator"];
 sheep_sheep_race_mvc_AbstractMediator.prototype = {
@@ -757,8 +786,11 @@ sheep_sheep_race_mvc_AbstractMediator.prototype = {
 	}
 	,destroy: function() {
 	}
-	,updateDispacher: function() {
-		this.dispatcher = this.viewComponent.parent;
+	,addContextListener: function(event,fn) {
+		this.dispatcher.on(event,fn);
+	}
+	,removeContextListener: function(event,fn) {
+		this.dispatcher.removeListener(event,fn);
 	}
 	,dispatcherEvent: function(event) {
 		this.dispatcher.emit(event,event);
@@ -768,6 +800,7 @@ sheep_sheep_race_mvc_AbstractMediator.prototype = {
 var sheep_sheep_race_mediators_AlertPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
 	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_AlertPopup);
+	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
 };
 sheep_sheep_race_mediators_AlertPopupMediator.__name__ = ["sheep","sheep","race","mediators","AlertPopupMediator"];
 sheep_sheep_race_mediators_AlertPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
@@ -776,7 +809,7 @@ sheep_sheep_race_mediators_AlertPopupMediator.prototype = $extend(sheep_sheep_ra
 		this.view.okButton.on("click",$bind(this,this.onOk));
 	}
 	,onOk: function() {
-		this.dispatcherEvent("removeLastFloatingView");
+		this.flowService.removeLastFloatingView();
 	}
 	,__class__: sheep_sheep_race_mediators_AlertPopupMediator
 });
@@ -791,6 +824,8 @@ sheep_sheep_race_mediators_BetFeedbackPopupMediator.prototype = $extend(sheep_sh
 var sheep_sheep_race_mediators_BetPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
 	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_BetPopup);
+	this.gameModel = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_models_GameModel);
+	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
 };
 sheep_sheep_race_mediators_BetPopupMediator.__name__ = ["sheep","sheep","race","mediators","BetPopupMediator"];
 sheep_sheep_race_mediators_BetPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
@@ -799,30 +834,72 @@ sheep_sheep_race_mediators_BetPopupMediator.prototype = $extend(sheep_sheep_race
 		this.view.startButton.on("click",$bind(this,this.onStart));
 	}
 	,onStart: function() {
-		if(this.view.sheepSelectorFirst.getCurrentIndex() == this.view.sheepSelectorLast.getCurrentIndex()) {
-			this.dispatcherEvent("addAlertPopup");
+		var yourBetToFirstPosition = this.view.sheepSelectorFirst.getCurrentIndex();
+		var yourBetToLastPosition = this.view.sheepSelectorLast.getCurrentIndex();
+		if(yourBetToFirstPosition == yourBetToLastPosition) {
+			this.flowService.addAlertPopup();
 			return;
 		}
-		this.dispatcherEvent("removeLastFloatingView");
+		this.gameModel.yourBetToFirstPosition = yourBetToFirstPosition;
+		this.gameModel.yourBetToLastPosition = yourBetToLastPosition;
+		this.flowService.removeLastFloatingView();
 	}
 	,destroy: function() {
-		console.log("DESTROY?");
-		this.dispatcherEvent("addStartingPopup");
+		this.flowService.addStartingPopup();
 	}
 	,__class__: sheep_sheep_race_mediators_BetPopupMediator
 });
 var sheep_sheep_race_mediators_GameViewMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
 	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_GameView);
+	this.gameModel = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_models_GameModel);
+	this.gameManager = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_managers_GameManager);
+	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
 };
 sheep_sheep_race_mediators_GameViewMediator.__name__ = ["sheep","sheep","race","mediators","GameViewMediator"];
 sheep_sheep_race_mediators_GameViewMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
 sheep_sheep_race_mediators_GameViewMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
 	initialize: function() {
+		this.isActivedLoop = false;
 		this.view.betButton.addListener("click",$bind(this,this.onClick));
+		this.addContextListener("start",$bind(this,this.onGameStart));
+		this.addContextListener("finish",$bind(this,this.onGameFinish));
+	}
+	,onGameFinish: function(e) {
+		this.isActivedLoop = false;
+		var sheeps = this.view.getSheeps();
+		var _g1 = 0;
+		var _g = sheeps.length;
+		while(_g1 < _g) sheeps[_g1++].stop();
+		this.flowService.addBetFeedbackPopup();
+	}
+	,onGameStart: function(e) {
+		this.isActivedLoop = true;
+		var sheeps = this.view.getSheeps();
+		var _g1 = 0;
+		var _g = sheeps.length;
+		while(_g1 < _g) sheeps[_g1++].play();
+		window.requestAnimationFrame($bind(this,this.onLoop));
+	}
+	,onLoop: function() {
+		if(this.isActivedLoop == false) {
+			return;
+		}
+		window.requestAnimationFrame($bind(this,this.onLoop));
+		this.udpate();
+	}
+	,udpate: function() {
+		this.gameManager.updateRace();
+		var sheeps = this.view.getSheeps();
+		var _g1 = 0;
+		var _g = sheeps.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			sheeps[i].x = this.gameModel.distances[i];
+		}
 	}
 	,onClick: function() {
-		this.dispatcherEvent("addBetPopup");
+		this.flowService.addBetPopup();
 	}
 	,destroy: function() {
 		this.view.removeAllListeners();
@@ -832,6 +909,7 @@ sheep_sheep_race_mediators_GameViewMediator.prototype = $extend(sheep_sheep_race
 var sheep_sheep_race_mediators_HomeViewMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
 	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_HomeView);
+	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
 };
 sheep_sheep_race_mediators_HomeViewMediator.__name__ = ["sheep","sheep","race","mediators","HomeViewMediator"];
 sheep_sheep_race_mediators_HomeViewMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
@@ -840,10 +918,9 @@ sheep_sheep_race_mediators_HomeViewMediator.prototype = $extend(sheep_sheep_race
 		this.view.startButton.addListener("click",$bind(this,this.onClick));
 	}
 	,onClick: function() {
-		this.dispatcherEvent("showGame");
+		this.flowService.setGameView();
 	}
 	,destroy: function() {
-		console.log("HOME DESTROY");
 		this.view.removeAllListeners();
 	}
 	,__class__: sheep_sheep_race_mediators_HomeViewMediator
@@ -851,6 +928,7 @@ sheep_sheep_race_mediators_HomeViewMediator.prototype = $extend(sheep_sheep_race
 var sheep_sheep_race_mediators_IntroViewMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
 	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_IntroView);
+	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
 };
 sheep_sheep_race_mediators_IntroViewMediator.__name__ = ["sheep","sheep","race","mediators","IntroViewMediator"];
 sheep_sheep_race_mediators_IntroViewMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
@@ -861,7 +939,7 @@ sheep_sheep_race_mediators_IntroViewMediator.prototype = $extend(sheep_sheep_rac
 	}
 	,onTimer: function() {
 		this.timer.stop();
-		this.dispatcherEvent("showHome");
+		this.flowService.setHomeView();
 	}
 	,__class__: sheep_sheep_race_mediators_IntroViewMediator
 });
@@ -887,9 +965,38 @@ sheep_sheep_race_mediators_StartingPopupMediator.prototype = $extend(sheep_sheep
 		this.dispatcherEvent("removeLastFloatingView");
 	}
 	,destroy: function() {
+		this.dispatcherEvent("start");
 	}
 	,__class__: sheep_sheep_race_mediators_StartingPopupMediator
 });
+var sheep_sheep_race_models_GameModel = function() {
+	this.clear();
+};
+sheep_sheep_race_models_GameModel.__name__ = ["sheep","sheep","race","models","GameModel"];
+sheep_sheep_race_models_GameModel.prototype = {
+	addRacePosition: function(index) {
+		if(this.racePositions.indexOf(index) == -1) {
+			this.racePositions.push(index);
+		}
+	}
+	,isTheRaceFinished: function() {
+		return this.racePositions.length == this.distances.length;
+	}
+	,clear: function() {
+		this.distances = [0,0,0,0];
+		this.racePositions = [];
+		this.yourBetToFirstPosition = 0;
+		this.yourBetToLastPosition = 0;
+	}
+	,__class__: sheep_sheep_race_models_GameModel
+};
+var sheep_sheep_race_mvc_AbstractService = function() {
+	this.dispatcher = sheep_sheep_race_mvc_Repository.getInstanceOf(PIXI.Container);
+};
+sheep_sheep_race_mvc_AbstractService.__name__ = ["sheep","sheep","race","mvc","AbstractService"];
+sheep_sheep_race_mvc_AbstractService.prototype = {
+	__class__: sheep_sheep_race_mvc_AbstractService
+};
 var sheep_sheep_race_mvc_FlowManager = function(stage,mediatorMap) {
 	this.mediatorMap = mediatorMap;
 	this.stage = stage;
@@ -979,7 +1086,6 @@ sheep_sheep_race_mvc_MediatorMap.prototype = {
 			return;
 		}
 		var mediator = Type.createInstance(mediatorClass,[view]);
-		mediator.updateDispacher();
 		mediator.initialize();
 		var _this1 = this.activedMediators;
 		if(__map_reserved[viewClassName] != null) {
@@ -1003,6 +1109,44 @@ sheep_sheep_race_mvc_MediatorMap.prototype = {
 		mediator = null;
 	}
 	,__class__: sheep_sheep_race_mvc_MediatorMap
+};
+var sheep_sheep_race_mvc_Repository = function() {
+	this.init();
+};
+sheep_sheep_race_mvc_Repository.__name__ = ["sheep","sheep","race","mvc","Repository"];
+sheep_sheep_race_mvc_Repository.mapAsSingleton = function(clazz) {
+	var key = Type.getClassName(clazz);
+	var value = Type.createInstance(clazz,[]);
+	var _this = sheep_sheep_race_mvc_Repository.instance.map;
+	if(__map_reserved[key] != null) {
+		_this.setReserved(key,value);
+	} else {
+		_this.h[key] = value;
+	}
+};
+sheep_sheep_race_mvc_Repository.getInstanceOf = function(clazz) {
+	var key = Type.getClassName(clazz);
+	var _this = sheep_sheep_race_mvc_Repository.instance.map;
+	if(__map_reserved[key] != null) {
+		return _this.getReserved(key);
+	} else {
+		return _this.h[key];
+	}
+};
+sheep_sheep_race_mvc_Repository.mapToSingleton = function(object,clazz) {
+	var key = Type.getClassName(clazz);
+	var _this = sheep_sheep_race_mvc_Repository.instance.map;
+	if(__map_reserved[key] != null) {
+		_this.setReserved(key,object);
+	} else {
+		_this.h[key] = object;
+	}
+};
+sheep_sheep_race_mvc_Repository.prototype = {
+	init: function() {
+		this.map = new haxe_ds_StringMap();
+	}
+	,__class__: sheep_sheep_race_mvc_Repository
 };
 var sheep_sheep_race_mvc_ViewManager = function(stage) {
 	this.stage = stage;
@@ -1059,8 +1203,62 @@ sheep_sheep_race_mvc_ViewManager.prototype = {
 	}
 	,__class__: sheep_sheep_race_mvc_ViewManager
 };
+var sheep_sheep_race_services_FlowService = function() {
+	sheep_sheep_race_mvc_AbstractService.call(this);
+};
+sheep_sheep_race_services_FlowService.__name__ = ["sheep","sheep","race","services","FlowService"];
+sheep_sheep_race_services_FlowService.__super__ = sheep_sheep_race_mvc_AbstractService;
+sheep_sheep_race_services_FlowService.prototype = $extend(sheep_sheep_race_mvc_AbstractService.prototype,{
+	dispatcherEvent: function(event) {
+		this.dispatcher.emit(event,event);
+	}
+	,setHomeView: function() {
+		this.dispatcherEvent("showHome");
+	}
+	,setGameView: function() {
+		this.dispatcherEvent("showGame");
+	}
+	,addBetPopup: function() {
+		this.dispatcherEvent("addBetPopup");
+	}
+	,addBetFeedbackPopup: function() {
+		this.dispatcherEvent("addBetFeedbackPopup");
+	}
+	,addStartingPopup: function() {
+		this.dispatcherEvent("addStartingPopup");
+	}
+	,addAlertPopup: function() {
+		this.dispatcherEvent("addAlertPopup");
+	}
+	,removeLastFloatingView: function() {
+		this.dispatcherEvent("removeLastFloatingView");
+	}
+	,__class__: sheep_sheep_race_services_FlowService
+});
+var sheep_sheep_race_services_GameService = function() {
+	sheep_sheep_race_mvc_AbstractService.call(this);
+};
+sheep_sheep_race_services_GameService.__name__ = ["sheep","sheep","race","services","GameService"];
+sheep_sheep_race_services_GameService.__super__ = sheep_sheep_race_mvc_AbstractService;
+sheep_sheep_race_services_GameService.prototype = $extend(sheep_sheep_race_mvc_AbstractService.prototype,{
+	dispatcherEvent: function(event) {
+		this.dispatcher.emit(event,event);
+	}
+	,finish: function() {
+		this.dispatcherEvent("finish");
+	}
+	,start: function() {
+		this.dispatcherEvent("start");
+	}
+	,__class__: sheep_sheep_race_services_GameService
+});
 var sheep_sheep_race_setup_ContextConfig = function(stage) {
 	this.stage = stage;
+	sheep_sheep_race_mvc_Repository.mapToSingleton(stage,PIXI.Container);
+	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_models_GameModel);
+	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_services_GameService);
+	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_services_FlowService);
+	sheep_sheep_race_mvc_Repository.mapAsSingleton(sheep_sheep_race_managers_GameManager);
 	this.mediatorMap = new sheep_sheep_race_mvc_MediatorMap();
 	this.mediatorMap.map(sheep_sheep_race_views_IntroView,sheep_sheep_race_mediators_IntroViewMediator);
 	this.mediatorMap.map(sheep_sheep_race_views_HomeView,sheep_sheep_race_mediators_HomeViewMediator);
@@ -1297,25 +1495,26 @@ var sheep_sheep_race_views_GameView = function() {
 	this.addChild(sheep_sheep_race_utils_SpriteFactory.getBackgroundColor(3655644));
 	this.addChild(sheep_sheep_race_utils_SpriteFactory.getSprite("background_game.png"));
 	var raceContent = sheep_sheep_race_utils_SpriteFactory.getEmptyContainer();
-	raceContent.x = 30;
+	raceContent.x = 50;
 	raceContent.y = 200;
 	this.addChild(raceContent);
 	var startMark = sheep_sheep_race_utils_SpriteFactory.getSprite("start_mark.png");
-	startMark.x = 55;
+	startMark.x = 35;
 	startMark.y = 20;
 	raceContent.addChild(startMark);
 	var finishMark = sheep_sheep_race_utils_SpriteFactory.getSprite("finish_mark.png");
-	finishMark.x = 520;
+	finishMark.x = 500;
 	finishMark.y = 20;
 	raceContent.addChild(finishMark);
-	var sheeps = [sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_01),sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_02),sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_03),sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_04)];
+	this.sheeps = [sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_01),sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_02),sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_03),sheep_sheep_race_utils_SpriteFactory.getMovieClip(sheep_sheep_race_info_AssetsInfo.SHEEP_04)];
 	var _g1 = 0;
-	var _g = sheeps.length;
+	var _g = this.sheeps.length;
 	while(_g1 < _g) {
 		var i = _g1++;
-		sheeps[i].y = i * 45;
-		sheeps[i].stop();
-		raceContent.addChild(sheeps[i]);
+		this.sheeps[i].pivot.x = this.sheeps[i].width * .5;
+		this.sheeps[i].y = i * 45;
+		this.sheeps[i].stop();
+		raceContent.addChild(this.sheeps[i]);
 	}
 	this.betButton = sheep_sheep_race_utils_SpriteFactory.getBasicButton("BET");
 	this.betButton.x = 320;
@@ -1325,7 +1524,10 @@ var sheep_sheep_race_views_GameView = function() {
 sheep_sheep_race_views_GameView.__name__ = ["sheep","sheep","race","views","GameView"];
 sheep_sheep_race_views_GameView.__super__ = PIXI.Container;
 sheep_sheep_race_views_GameView.prototype = $extend(PIXI.Container.prototype,{
-	__class__: sheep_sheep_race_views_GameView
+	getSheeps: function() {
+		return this.sheeps;
+	}
+	,__class__: sheep_sheep_race_views_GameView
 });
 var sheep_sheep_race_views_HomeView = function() {
 	PIXI.Container.call(this);
@@ -1556,6 +1758,8 @@ sheep_sheep_race_events_FlowEvent.ADD_ALERT_POPUP = "addAlertPopup";
 sheep_sheep_race_events_FlowEvent.ADD_BET_FEEDBACK_POPUP = "addBetFeedbackPopup";
 sheep_sheep_race_events_FlowEvent.ADD_STARTING_POPUP = "addStartingPopup";
 sheep_sheep_race_events_FlowEvent.REMOVE_LAST_FLOATING_VIEW = "removeLastFloatingView";
+sheep_sheep_race_events_GameEvent.START = "start";
+sheep_sheep_race_events_GameEvent.FINISH = "finish";
 sheep_sheep_race_info_AssetsInfo.FONT = "20px SetzerPixelFont";
 sheep_sheep_race_info_AssetsInfo.SHEEP_LOGO = "sheep_logo.png";
 sheep_sheep_race_info_AssetsInfo.BACKGROUND_GAME = "background_game.png";
@@ -1593,6 +1797,7 @@ sheep_sheep_race_info_TextInfo.YOU_LOSE = "YOU LOSE !!";
 sheep_sheep_race_info_TextInfo.YOUR_BETS = "YOUR BETS";
 sheep_sheep_race_info_TextInfo.BET_MISTAKE = "IT IS NOT ALLOWED \nTO SELECT TWO \nIDENTICAL SHEEP TO \nDIFFERENT BETS";
 sheep_sheep_race_info_TextInfo.STARTING = "STARTING";
+sheep_sheep_race_mvc_Repository.instance = new sheep_sheep_race_mvc_Repository();
 sheep_sheep_race_utils_ViewPort.MAX_WIDTH = 640;
 sheep_sheep_race_utils_ViewPort.MAX_HEIGHT = 480;
 sheep_sheep_race_utils_ViewPort.HALF_WIDTH = 320;

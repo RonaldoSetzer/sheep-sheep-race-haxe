@@ -1,5 +1,6 @@
 package sheep.sheep.race.mvc;
 import pixi.core.display.Container;
+import pixi.interaction.EventTarget;
 
 /**
  * ...
@@ -13,6 +14,7 @@ class AbstractMediator
 	public function new(view:Container) 
 	{
 		viewComponent = view;
+		dispatcher = Repository.getInstanceOf(Container);
 	}
 	
 	public function initialize()
@@ -25,9 +27,14 @@ class AbstractMediator
 		
 	}
 	
-	public function updateDispacher()
+	public function addContextListener( event:String, fn:EventTarget->Void) 
 	{
-		dispatcher = viewComponent.parent;
+		dispatcher.on( event, fn );
+	}
+	
+	public function removeContextListener( event:String, fn:EventTarget->Void) 
+	{
+		dispatcher.removeListener(event, fn);
 	}
 
 	function dispatcherEvent( event:String )

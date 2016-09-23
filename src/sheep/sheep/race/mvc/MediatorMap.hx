@@ -44,7 +44,6 @@ class MediatorMap
 		if (mediatorClass == null  ) return;
 		
 		var mediator:AbstractMediator = Type.createInstance(mediatorClass, [view]);
-		mediator.updateDispacher();
 		mediator.initialize();
 		
 		activedMediators.set(viewClassName,mediator);

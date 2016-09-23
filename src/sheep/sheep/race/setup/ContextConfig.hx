@@ -1,16 +1,21 @@
 package sheep.sheep.race.setup;
 import pixi.core.display.Container;
 import sheep.sheep.race.events.FlowEvent;
+import sheep.sheep.race.managers.GameManager;
 import sheep.sheep.race.mediators.AlertPopupMediator;
 import sheep.sheep.race.mediators.BetFeedbackPopupMediator;
 import sheep.sheep.race.mediators.BetPopupMediator;
 import sheep.sheep.race.mediators.GameViewMediator;
 import sheep.sheep.race.mediators.IntroViewMediator;
 import sheep.sheep.race.mediators.StartingPopupMediator;
+import sheep.sheep.race.models.GameModel;
 import sheep.sheep.race.mvc.FlowManager;
 import sheep.sheep.race.mvc.MediatorMap;
+import sheep.sheep.race.mvc.Repository;
 import sheep.sheep.race.mvc.ViewManager;
 import sheep.sheep.race.mediators.HomeViewMediator;
+import sheep.sheep.race.services.FlowService;
+import sheep.sheep.race.services.GameService;
 import sheep.sheep.race.views.AlertPopup;
 import sheep.sheep.race.views.BetFeedbackPopup;
 import sheep.sheep.race.views.BetPopup;
@@ -32,6 +37,13 @@ class ContextConfig
 	public function new(stage:Container) 
 	{
 		this.stage = stage;
+		
+		Repository.mapToSingleton( stage, Container);
+		
+		Repository.mapAsSingleton(GameModel);
+		Repository.mapAsSingleton(GameService);
+		Repository.mapAsSingleton(FlowService);
+		Repository.mapAsSingleton(GameManager);
 		
 		mediatorMap = new MediatorMap();
 		mediatorMap.map(IntroView, IntroViewMediator);

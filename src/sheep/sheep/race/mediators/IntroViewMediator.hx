@@ -2,23 +2,27 @@ package sheep.sheep.race.mediators;
 
 import haxe.Timer;
 import pixi.core.display.Container;
-import sheep.sheep.race.events.FlowEvent;
 import sheep.sheep.race.mvc.AbstractMediator;
+import sheep.sheep.race.mvc.Repository;
+import sheep.sheep.race.services.FlowService;
 import sheep.sheep.race.views.IntroView;
 
 /**
  * ...
  * @author Ronaldo Santiago
  */
-class IntroViewMediator extends AbstractMediator 
+class IntroViewMediator extends AbstractMediator
 {
 	var view:IntroView;
 	var timer:Timer;
-
+	var flowService:FlowService;
+	
 	public function new(view:Container) 
 	{
 		super(view);
+		
 		this.view = cast(viewComponent, IntroView);
+		flowService = Repository.getInstanceOf(FlowService);
 	}
 	
 	override public function initialize() 
@@ -30,6 +34,6 @@ class IntroViewMediator extends AbstractMediator
 	function onTimer() 
 	{
 		timer.stop();
-		dispatcherEvent(FlowEvent.SHOW_HOME);
+		flowService.setHomeView();
 	}
 }
