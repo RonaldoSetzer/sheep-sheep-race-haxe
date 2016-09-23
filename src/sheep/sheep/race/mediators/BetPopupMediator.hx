@@ -29,7 +29,7 @@ class BetPopupMediator extends AbstractMediator
 	
 	override public function initialize() 
 	{
-		view.startButton.on("click", onStart);
+		view.startButton.addListener("click", onStart);
 	}
 	
 	function onStart() 
@@ -50,6 +50,7 @@ class BetPopupMediator extends AbstractMediator
 	
 	override public function destroy() 
 	{
+		view.startButton.removeListener("click", onStart);
 		flowService.addStartingPopup();
 	}
 	

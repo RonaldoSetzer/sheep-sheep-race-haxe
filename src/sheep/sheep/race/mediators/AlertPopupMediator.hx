@@ -26,11 +26,16 @@ class AlertPopupMediator extends AbstractMediator
 	
 	override public function initialize() 
 	{
-		view.okButton.on("click", onOk);
+		view.okButton.addListener("click", onOk);
 	}
 	
 	function onOk() 
 	{
 		flowService.removeLastFloatingView();
+	}
+	
+	override public function destroy() 
+	{
+		view.okButton.removeListener("click", onOk);
 	}
 }

@@ -11,7 +11,6 @@ import sheep.sheep.race.mvc.Repository;
 import sheep.sheep.race.services.FlowService;
 import sheep.sheep.race.views.GameView;
 
-
 /**
  * ...
  * @author Ronaldo Santiago
@@ -38,6 +37,8 @@ class GameViewMediator extends AbstractMediator
 	override public function initialize() 
 	{
 		isActivedLoop = false;
+		gameModel.clear();
+		udpatePositions();
 		
 		view.betButton.addListener("click", onClick );
 		addContextListener( GameEvent.START, onGameStart );
@@ -73,14 +74,13 @@ class GameViewMediator extends AbstractMediator
 		
 		Browser.window.requestAnimationFrame(cast onLoop);
 		
-		udpate();
+		gameManager.updateRace();
+		udpatePositions();
 	}
 	
-	function udpate() 
+	function udpatePositions() 
 	{
-		gameManager.updateRace();
 		var sheeps:Array<MovieClip> = view.getSheeps();
-		
 		for ( i in 0...sheeps.length )
 		{
 			sheeps[i].x = gameModel.distances[i];
@@ -89,11 +89,15 @@ class GameViewMediator extends AbstractMediator
 	
 	function onClick() 
 	{
+		view.betButton.visible = false;
 		flowService.addBetPopup();
 	}
 	
 	override public function destroy() 
 	{
+		view.betButton.removeListener("click", onClick );
+		removeContextListener( GameEvent.START, onGameStart );
+		removeContextListener( GameEvent.FINISH, onGameFinish );
 		view.removeAllListeners();
 	}
 	

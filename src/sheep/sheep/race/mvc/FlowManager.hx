@@ -53,6 +53,10 @@ class FlowManager
 	private function onSetView(type:Dynamic) 
 	{
 		mediatorMap.unmediate(viewManager.get_currentView());
+		for ( i in 0...viewManager.floatingViews.length)
+		{
+			mediatorMap.unmediate(viewManager.floatingViews[i]);
+		}
 		
 		var viewClass:Class<Dynamic> = mapEvents.get(type);
 		var view:Container = Type.createInstance(viewClass,[]);
@@ -62,9 +66,7 @@ class FlowManager
 	}
 	
 	private function onAddView(type:Dynamic) 
-	{
-		mediatorMap.unmediate(viewManager.get_currentView());
-		
+	{		
 		var viewClass:Class<Dynamic> = mapEvents.get(type);
 		var view:Container = Type.createInstance(viewClass,[]);
 		viewManager.addView(view);

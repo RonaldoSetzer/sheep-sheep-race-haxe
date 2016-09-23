@@ -806,20 +806,41 @@ sheep_sheep_race_mediators_AlertPopupMediator.__name__ = ["sheep","sheep","race"
 sheep_sheep_race_mediators_AlertPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
 sheep_sheep_race_mediators_AlertPopupMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
 	initialize: function() {
-		this.view.okButton.on("click",$bind(this,this.onOk));
+		this.view.okButton.addListener("click",$bind(this,this.onOk));
 	}
 	,onOk: function() {
 		this.flowService.removeLastFloatingView();
+	}
+	,destroy: function() {
+		this.view.okButton.removeListener("click",$bind(this,this.onOk));
 	}
 	,__class__: sheep_sheep_race_mediators_AlertPopupMediator
 });
 var sheep_sheep_race_mediators_BetFeedbackPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
+	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_BetFeedbackPopup);
+	this.gameModel = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_models_GameModel);
+	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
 };
 sheep_sheep_race_mediators_BetFeedbackPopupMediator.__name__ = ["sheep","sheep","race","mediators","BetFeedbackPopupMediator"];
 sheep_sheep_race_mediators_BetFeedbackPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
 sheep_sheep_race_mediators_BetFeedbackPopupMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
-	__class__: sheep_sheep_race_mediators_BetFeedbackPopupMediator
+	initialize: function() {
+		this.view.createPodium(this.gameModel);
+		this.view.homeButton.addListener("click",$bind(this,this.onHome));
+		this.view.retryButton.addListener("click",$bind(this,this.onRetry));
+	}
+	,onRetry: function() {
+		this.flowService.setGameView();
+	}
+	,onHome: function() {
+		this.flowService.setHomeView();
+	}
+	,destroy: function() {
+		this.view.homeButton.removeListener("click",$bind(this,this.onHome));
+		this.view.retryButton.removeListener("click",$bind(this,this.onRetry));
+	}
+	,__class__: sheep_sheep_race_mediators_BetFeedbackPopupMediator
 });
 var sheep_sheep_race_mediators_BetPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
@@ -831,7 +852,7 @@ sheep_sheep_race_mediators_BetPopupMediator.__name__ = ["sheep","sheep","race","
 sheep_sheep_race_mediators_BetPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
 sheep_sheep_race_mediators_BetPopupMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
 	initialize: function() {
-		this.view.startButton.on("click",$bind(this,this.onStart));
+		this.view.startButton.addListener("click",$bind(this,this.onStart));
 	}
 	,onStart: function() {
 		var yourBetToFirstPosition = this.view.sheepSelectorFirst.getCurrentIndex();
@@ -845,6 +866,7 @@ sheep_sheep_race_mediators_BetPopupMediator.prototype = $extend(sheep_sheep_race
 		this.flowService.removeLastFloatingView();
 	}
 	,destroy: function() {
+		this.view.startButton.removeListener("click",$bind(this,this.onStart));
 		this.flowService.addStartingPopup();
 	}
 	,__class__: sheep_sheep_race_mediators_BetPopupMediator
@@ -861,6 +883,8 @@ sheep_sheep_race_mediators_GameViewMediator.__super__ = sheep_sheep_race_mvc_Abs
 sheep_sheep_race_mediators_GameViewMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
 	initialize: function() {
 		this.isActivedLoop = false;
+		this.gameModel.clear();
+		this.udpatePositions();
 		this.view.betButton.addListener("click",$bind(this,this.onClick));
 		this.addContextListener("start",$bind(this,this.onGameStart));
 		this.addContextListener("finish",$bind(this,this.onGameFinish));
@@ -886,10 +910,10 @@ sheep_sheep_race_mediators_GameViewMediator.prototype = $extend(sheep_sheep_race
 			return;
 		}
 		window.requestAnimationFrame($bind(this,this.onLoop));
-		this.udpate();
-	}
-	,udpate: function() {
 		this.gameManager.updateRace();
+		this.udpatePositions();
+	}
+	,udpatePositions: function() {
 		var sheeps = this.view.getSheeps();
 		var _g1 = 0;
 		var _g = sheeps.length;
@@ -899,9 +923,13 @@ sheep_sheep_race_mediators_GameViewMediator.prototype = $extend(sheep_sheep_race
 		}
 	}
 	,onClick: function() {
+		this.view.betButton.visible = false;
 		this.flowService.addBetPopup();
 	}
 	,destroy: function() {
+		this.view.betButton.removeListener("click",$bind(this,this.onClick));
+		this.removeContextListener("start",$bind(this,this.onGameStart));
+		this.removeContextListener("finish",$bind(this,this.onGameFinish));
 		this.view.removeAllListeners();
 	}
 	,__class__: sheep_sheep_race_mediators_GameViewMediator
@@ -921,6 +949,7 @@ sheep_sheep_race_mediators_HomeViewMediator.prototype = $extend(sheep_sheep_race
 		this.flowService.setGameView();
 	}
 	,destroy: function() {
+		this.view.startButton.removeListener("click",$bind(this,this.onClick));
 		this.view.removeAllListeners();
 	}
 	,__class__: sheep_sheep_race_mediators_HomeViewMediator
@@ -939,6 +968,7 @@ sheep_sheep_race_mediators_IntroViewMediator.prototype = $extend(sheep_sheep_rac
 	}
 	,onTimer: function() {
 		this.timer.stop();
+		this.timer = null;
 		this.flowService.setHomeView();
 	}
 	,__class__: sheep_sheep_race_mediators_IntroViewMediator
@@ -946,6 +976,8 @@ sheep_sheep_race_mediators_IntroViewMediator.prototype = $extend(sheep_sheep_rac
 var sheep_sheep_race_mediators_StartingPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
 	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_StartingPopup);
+	this.flowService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_FlowService);
+	this.gameService = sheep_sheep_race_mvc_Repository.getInstanceOf(sheep_sheep_race_services_GameService);
 };
 sheep_sheep_race_mediators_StartingPopupMediator.__name__ = ["sheep","sheep","race","mediators","StartingPopupMediator"];
 sheep_sheep_race_mediators_StartingPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
@@ -962,10 +994,10 @@ sheep_sheep_race_mediators_StartingPopupMediator.prototype = $extend(sheep_sheep
 			return;
 		}
 		this.timer.stop();
-		this.dispatcherEvent("removeLastFloatingView");
+		this.flowService.removeLastFloatingView();
 	}
 	,destroy: function() {
-		this.dispatcherEvent("start");
+		this.gameService.start();
 	}
 	,__class__: sheep_sheep_race_mediators_StartingPopupMediator
 });
@@ -981,6 +1013,12 @@ sheep_sheep_race_models_GameModel.prototype = {
 	}
 	,isTheRaceFinished: function() {
 		return this.racePositions.length == this.distances.length;
+	}
+	,youWonTheFirstPosition: function() {
+		return this.racePositions[0] == this.yourBetToFirstPosition;
+	}
+	,youWonTheLastPosition: function() {
+		return this.racePositions[this.distances.length - 1] == this.yourBetToLastPosition;
 	}
 	,clear: function() {
 		this.distances = [0,0,0,0];
@@ -1033,6 +1071,9 @@ sheep_sheep_race_mvc_FlowManager.prototype = {
 	}
 	,onSetView: function(type) {
 		this.mediatorMap.unmediate(this.viewManager.get_currentView());
+		var _g1 = 0;
+		var _g = this.viewManager.floatingViews.length;
+		while(_g1 < _g) this.mediatorMap.unmediate(this.viewManager.floatingViews[_g1++]);
 		var _this = this.mapEvents;
 		var key = type;
 		var viewClass = __map_reserved[key] != null?_this.getReserved(key):_this.h[key];
@@ -1041,7 +1082,6 @@ sheep_sheep_race_mvc_FlowManager.prototype = {
 		this.mediatorMap.mediate(viewClass,view);
 	}
 	,onAddView: function(type) {
-		this.mediatorMap.unmediate(this.viewManager.get_currentView());
 		var _this = this.mapEvents;
 		var key = type;
 		var viewClass = __map_reserved[key] != null?_this.getReserved(key):_this.h[key];
@@ -1418,38 +1458,58 @@ var sheep_sheep_race_views_BetFeedbackPopup = function() {
 	this.homeButton.y = this.container.height * 0.85;
 	this.container.addChild(this.homeButton);
 	this.container.pivot.set(this.container.width * 0.5,0);
-	this.createPodium();
 };
 sheep_sheep_race_views_BetFeedbackPopup.__name__ = ["sheep","sheep","race","views","BetFeedbackPopup"];
 sheep_sheep_race_views_BetFeedbackPopup.__super__ = PIXI.Container;
 sheep_sheep_race_views_BetFeedbackPopup.prototype = $extend(PIXI.Container.prototype,{
-	createPodium: function() {
+	createPodium: function(gameModel) {
 		var sheeps = [sheep_sheep_race_info_AssetsInfo.SHEEP_01,sheep_sheep_race_info_AssetsInfo.SHEEP_02,sheep_sheep_race_info_AssetsInfo.SHEEP_03,sheep_sheep_race_info_AssetsInfo.SHEEP_04];
 		var sheep1;
+		var lastIndex = gameModel.racePositions.length - 1;
 		var _g1 = 0;
 		var _g = sheeps.length;
 		while(_g1 < _g) {
 			var i = _g1++;
-			sheep1 = new sheep_sheep_race_views_components_SheepPodium(sheeps[i],sheep_sheep_race_info_TextInfo.POSITIONS[i]);
+			sheep1 = new sheep_sheep_race_views_components_SheepPodium(sheeps[gameModel.racePositions[i]],sheep_sheep_race_info_TextInfo.POSITIONS[i]);
 			sheep1.x = 105 + 70 * i;
 			sheep1.y = 125;
 			this.container.addChild(sheep1);
+			if(i == 0) {
+				this.setWinnerLooser(gameModel.youWonTheFirstPosition(),sheep1);
+			}
+			if(i == lastIndex) {
+				this.setWinnerLooser(gameModel.youWonTheLastPosition(),sheep1);
+			}
 		}
 		var info = sheep_sheep_race_utils_SpriteFactory.getBitmapText("YOUR BETS");
 		info.x = this.container.width * 0.5;
 		info.y = 165;
 		info.pivot.x = info.width * 0.5;
 		this.container.addChild(info);
-		var firstPosition = sheep_sheep_race_utils_SpriteFactory.getBitmapText("1 ST : " + "YOU WIN !!");
+		var firstPosition = sheep_sheep_race_utils_SpriteFactory.getBitmapText("1 ST : " + this.getWinLoseText(gameModel.youWonTheFirstPosition()));
 		firstPosition.x = this.container.width * 0.5;
 		firstPosition.y = 195;
 		firstPosition.pivot.x = firstPosition.width * 0.5;
 		this.container.addChild(firstPosition);
-		var lastPosition = sheep_sheep_race_utils_SpriteFactory.getBitmapText("4 TH : " + "YOU LOSE !!");
+		var lastPosition = sheep_sheep_race_utils_SpriteFactory.getBitmapText("4 TH : " + this.getWinLoseText(gameModel.youWonTheLastPosition()));
 		lastPosition.x = this.container.width * 0.5;
 		lastPosition.y = 220;
 		lastPosition.pivot.x = lastPosition.width * 0.5;
 		this.container.addChild(lastPosition);
+	}
+	,setWinnerLooser: function(value,sheep1) {
+		if(value == true) {
+			sheep1.winner();
+		} else {
+			sheep1.looser();
+		}
+	}
+	,getWinLoseText: function(value) {
+		if(value == true) {
+			return "YOU WIN !!";
+		} else {
+			return "YOU LOSE !!";
+		}
 	}
 	,__class__: sheep_sheep_race_views_BetFeedbackPopup
 });

@@ -35,6 +35,7 @@ class HomeViewMediator extends AbstractMediator
 
 	override public function destroy() 
 	{
+		view.startButton.removeListener("click", onClick );
 		view.removeAllListeners();
 	}
 	

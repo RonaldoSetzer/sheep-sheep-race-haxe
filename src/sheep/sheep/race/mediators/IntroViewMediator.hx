@@ -34,6 +34,7 @@ class IntroViewMediator extends AbstractMediator
 	function onTimer() 
 	{
 		timer.stop();
+		timer = null;
 		flowService.setHomeView();
 	}
 }

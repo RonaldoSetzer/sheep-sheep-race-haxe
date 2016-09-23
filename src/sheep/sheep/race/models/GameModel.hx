@@ -30,6 +30,16 @@ class GameModel
 		return racePositions.length == distances.length;
 	}
 	
+	public function youWonTheFirstPosition():Bool
+	{
+		return racePositions[0] == yourBetToFirstPosition;
+	}
+	
+	public function youWonTheLastPosition():Bool
+	{
+		return racePositions[ distances.length-1] == yourBetToLastPosition;
+	}
+	
 	public function clear() 
 	{
 		distances = [0, 0, 0, 0];

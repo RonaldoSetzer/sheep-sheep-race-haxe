@@ -7,7 +7,7 @@ import pixi.core.display.Container;
  */
 class ViewManager 
 {
-	var floatingViews:Array<Container>;
+	public var floatingViews:Array<Container>;
 	var currentView(get, null):Container;
 	var stage(get, null):Container;
 
