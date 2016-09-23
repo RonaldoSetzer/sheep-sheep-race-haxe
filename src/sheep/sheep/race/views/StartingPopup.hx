@@ -33,4 +33,9 @@ class StartingPopup extends Container
 		addChild(countingText);
 	}
 	
+	public function updateValue(count:Int) 
+	{
+		countingText.text = Std.string(count);
+	}
+	
 }

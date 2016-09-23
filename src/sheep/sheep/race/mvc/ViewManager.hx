@@ -27,7 +27,7 @@ class ViewManager
 		return view;
 	}
 	
-	public function removeView( view:Container ) 
+	public function removeFloatingView( view:Container ) 
 	{
 		var index:Int = floatingViews.indexOf(view);
 		
@@ -37,17 +37,26 @@ class ViewManager
 		stage.removeChild(view);
 	}
 	
+	public function removeLastFloatingView():Container
+	{
+		if (floatingViews.length == 0) return null;
+		
+		var view:Container = floatingViews.pop();
+		stage.removeChild(view);
+		return view;
+	}
+	
 	public function removeAll() 
 	{
 		for ( i in 0...floatingViews.length )
 		{
-			removeView( floatingViews[i] );
+			removeFloatingView( floatingViews[i] );
 		}
 	}
 	
 	public function setView( view:Container ):Container
 	{
-		removeLastView();
+		removeCurrentView();
 		
 		currentView = view;
 		stage.addChild(currentView);
@@ -55,7 +64,7 @@ class ViewManager
 		return currentView;
 	}
 	
-	public function removeLastView() 
+	public function removeCurrentView() 
 	{
 		if (stage != null && currentView != null)
 		{

@@ -13,4 +13,5 @@ class FlowEvent
 	static public inline var ADD_ALERT_POPUP:String = "addAlertPopup";
 	static public inline var ADD_BET_FEEDBACK_POPUP:String = "addBetFeedbackPopup";
 	static public inline var ADD_STARTING_POPUP:String = "addStartingPopup";
+	static public inline var REMOVE_LAST_FLOATING_VIEW:String = "removeLastFloatingView";
 }

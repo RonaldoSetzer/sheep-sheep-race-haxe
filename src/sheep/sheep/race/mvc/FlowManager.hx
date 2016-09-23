@@ -2,6 +2,7 @@ package sheep.sheep.race.mvc;
 import pixi.core.Pixi;
 import pixi.core.display.Container;
 import pixi.interaction.EventTarget;
+import sheep.sheep.race.events.FlowEvent;
 import sheep.sheep.race.mediators.HomeViewMediator;
 import sheep.sheep.race.mvc.MediatorMap;
 import sheep.sheep.race.views.HomeView;
@@ -25,6 +26,16 @@ class FlowManager
 		this.stage = stage;
 		viewManager = new ViewManager(stage);
 		mapEvents = new Map<String,Class<Dynamic>>();
+		stage.on(FlowEvent.REMOVE_LAST_FLOATING_VIEW, onRemoveLastFloatingView);
+	}
+	
+	function onRemoveLastFloatingView() 
+	{
+		var view:Container = viewManager.removeLastFloatingView();
+		
+		if (view == null) return;
+		
+		mediatorMap.unmediate(view);
 	}
 	
 	public function mapSetView(event:String, view:Class<Dynamic>) 
@@ -59,5 +70,6 @@ class FlowManager
 		viewManager.addView(view);
 		
 		mediatorMap.mediate( viewClass, view );
-	}	
+	}
+	
 }

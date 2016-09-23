@@ -7,6 +7,7 @@ import pixi.core.display.Container;
  */
 class AbstractMediator
 {
+	var dispatcher:Container;
 	var viewComponent:Container;
 
 	public function new(view:Container) 
@@ -23,10 +24,15 @@ class AbstractMediator
 	{
 		
 	}
+	
+	public function updateDispacher()
+	{
+		dispatcher = viewComponent.parent;
+	}
 
 	function dispatcherEvent( event:String )
 	{
-		viewComponent.parent.emit(event, event);
+		dispatcher.emit(event, event);
 	}
 	
 }

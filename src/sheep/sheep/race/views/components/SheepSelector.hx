@@ -74,4 +74,9 @@ class SheepSelector extends Container
 		indexes.unshift( indexes.pop() );
 		updateImage( indexes[0] );
 	}
+	
+	public function getCurrentIndex():Int
+	{
+		return indexes[0];
+	}
 }

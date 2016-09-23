@@ -748,12 +748,6 @@ var sheep_sheep_race_info_ColorInfo = function() { };
 sheep_sheep_race_info_ColorInfo.__name__ = ["sheep","sheep","race","info","ColorInfo"];
 var sheep_sheep_race_info_TextInfo = function() { };
 sheep_sheep_race_info_TextInfo.__name__ = ["sheep","sheep","race","info","TextInfo"];
-var sheep_sheep_race_mediators_AlertPopupMediator = function() {
-};
-sheep_sheep_race_mediators_AlertPopupMediator.__name__ = ["sheep","sheep","race","mediators","AlertPopupMediator"];
-sheep_sheep_race_mediators_AlertPopupMediator.prototype = {
-	__class__: sheep_sheep_race_mediators_AlertPopupMediator
-};
 var sheep_sheep_race_mvc_AbstractMediator = function(view) {
 	this.viewComponent = view;
 };
@@ -763,11 +757,29 @@ sheep_sheep_race_mvc_AbstractMediator.prototype = {
 	}
 	,destroy: function() {
 	}
+	,updateDispacher: function() {
+		this.dispatcher = this.viewComponent.parent;
+	}
 	,dispatcherEvent: function(event) {
-		this.viewComponent.parent.emit(event,event);
+		this.dispatcher.emit(event,event);
 	}
 	,__class__: sheep_sheep_race_mvc_AbstractMediator
 };
+var sheep_sheep_race_mediators_AlertPopupMediator = function(view) {
+	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
+	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_AlertPopup);
+};
+sheep_sheep_race_mediators_AlertPopupMediator.__name__ = ["sheep","sheep","race","mediators","AlertPopupMediator"];
+sheep_sheep_race_mediators_AlertPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
+sheep_sheep_race_mediators_AlertPopupMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
+	initialize: function() {
+		this.view.okButton.on("click",$bind(this,this.onOk));
+	}
+	,onOk: function() {
+		this.dispatcherEvent("removeLastFloatingView");
+	}
+	,__class__: sheep_sheep_race_mediators_AlertPopupMediator
+});
 var sheep_sheep_race_mediators_BetFeedbackPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
 };
@@ -778,11 +790,26 @@ sheep_sheep_race_mediators_BetFeedbackPopupMediator.prototype = $extend(sheep_sh
 });
 var sheep_sheep_race_mediators_BetPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
+	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_BetPopup);
 };
 sheep_sheep_race_mediators_BetPopupMediator.__name__ = ["sheep","sheep","race","mediators","BetPopupMediator"];
 sheep_sheep_race_mediators_BetPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
 sheep_sheep_race_mediators_BetPopupMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
-	__class__: sheep_sheep_race_mediators_BetPopupMediator
+	initialize: function() {
+		this.view.startButton.on("click",$bind(this,this.onStart));
+	}
+	,onStart: function() {
+		if(this.view.sheepSelectorFirst.getCurrentIndex() == this.view.sheepSelectorLast.getCurrentIndex()) {
+			this.dispatcherEvent("addAlertPopup");
+			return;
+		}
+		this.dispatcherEvent("removeLastFloatingView");
+	}
+	,destroy: function() {
+		console.log("DESTROY?");
+		this.dispatcherEvent("addStartingPopup");
+	}
+	,__class__: sheep_sheep_race_mediators_BetPopupMediator
 });
 var sheep_sheep_race_mediators_GameViewMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
@@ -840,21 +867,46 @@ sheep_sheep_race_mediators_IntroViewMediator.prototype = $extend(sheep_sheep_rac
 });
 var sheep_sheep_race_mediators_StartingPopupMediator = function(view) {
 	sheep_sheep_race_mvc_AbstractMediator.call(this,view);
+	this.view = js_Boot.__cast(this.viewComponent , sheep_sheep_race_views_StartingPopup);
 };
 sheep_sheep_race_mediators_StartingPopupMediator.__name__ = ["sheep","sheep","race","mediators","StartingPopupMediator"];
 sheep_sheep_race_mediators_StartingPopupMediator.__super__ = sheep_sheep_race_mvc_AbstractMediator;
 sheep_sheep_race_mediators_StartingPopupMediator.prototype = $extend(sheep_sheep_race_mvc_AbstractMediator.prototype,{
-	__class__: sheep_sheep_race_mediators_StartingPopupMediator
+	initialize: function() {
+		this.timer = new haxe_Timer(600);
+		this.timer.run = $bind(this,this.onTimer);
+		this.count = 3;
+	}
+	,onTimer: function() {
+		this.count -= 1;
+		this.view.updateValue(this.count);
+		if(this.count > 0) {
+			return;
+		}
+		this.timer.stop();
+		this.dispatcherEvent("removeLastFloatingView");
+	}
+	,destroy: function() {
+	}
+	,__class__: sheep_sheep_race_mediators_StartingPopupMediator
 });
 var sheep_sheep_race_mvc_FlowManager = function(stage,mediatorMap) {
 	this.mediatorMap = mediatorMap;
 	this.stage = stage;
 	this.viewManager = new sheep_sheep_race_mvc_ViewManager(stage);
 	this.mapEvents = new haxe_ds_StringMap();
+	stage.on("removeLastFloatingView",$bind(this,this.onRemoveLastFloatingView));
 };
 sheep_sheep_race_mvc_FlowManager.__name__ = ["sheep","sheep","race","mvc","FlowManager"];
 sheep_sheep_race_mvc_FlowManager.prototype = {
-	mapSetView: function(event,view) {
+	onRemoveLastFloatingView: function() {
+		var view = this.viewManager.removeLastFloatingView();
+		if(view == null) {
+			return;
+		}
+		this.mediatorMap.unmediate(view);
+	}
+	,mapSetView: function(event,view) {
 		var _this = this.mapEvents;
 		if(__map_reserved[event] != null) {
 			_this.setReserved(event,view);
@@ -927,6 +979,7 @@ sheep_sheep_race_mvc_MediatorMap.prototype = {
 			return;
 		}
 		var mediator = Type.createInstance(mediatorClass,[view]);
+		mediator.updateDispacher();
 		mediator.initialize();
 		var _this1 = this.activedMediators;
 		if(__map_reserved[viewClassName] != null) {
@@ -964,7 +1017,7 @@ sheep_sheep_race_mvc_ViewManager.prototype = {
 		}
 		return view;
 	}
-	,removeView: function(view) {
+	,removeFloatingView: function(view) {
 		var index = this.floatingViews.indexOf(view);
 		if(index == -1) {
 			return;
@@ -972,19 +1025,27 @@ sheep_sheep_race_mvc_ViewManager.prototype = {
 		this.floatingViews.splice(index,1);
 		this.get_stage().removeChild(view);
 	}
+	,removeLastFloatingView: function() {
+		if(this.floatingViews.length == 0) {
+			return null;
+		}
+		var view = this.floatingViews.pop();
+		this.get_stage().removeChild(view);
+		return view;
+	}
 	,removeAll: function() {
 		var _g1 = 0;
 		var _g = this.floatingViews.length;
-		while(_g1 < _g) this.removeView(this.floatingViews[_g1++]);
+		while(_g1 < _g) this.removeFloatingView(this.floatingViews[_g1++]);
 	}
 	,setView: function(view) {
-		this.removeLastView();
+		this.removeCurrentView();
 		this.currentView = view;
 		var tmp = this.get_currentView();
 		this.get_stage().addChild(tmp);
 		return this.get_currentView();
 	}
-	,removeLastView: function() {
+	,removeCurrentView: function() {
 		if(this.get_stage() != null && this.get_currentView() != null) {
 			var tmp = this.get_currentView();
 			this.get_stage().removeChild(tmp);
@@ -1314,7 +1375,10 @@ var sheep_sheep_race_views_StartingPopup = function() {
 sheep_sheep_race_views_StartingPopup.__name__ = ["sheep","sheep","race","views","StartingPopup"];
 sheep_sheep_race_views_StartingPopup.__super__ = PIXI.Container;
 sheep_sheep_race_views_StartingPopup.prototype = $extend(PIXI.Container.prototype,{
-	__class__: sheep_sheep_race_views_StartingPopup
+	updateValue: function(count) {
+		this.countingText.text = count == null?"null":"" + count;
+	}
+	,__class__: sheep_sheep_race_views_StartingPopup
 });
 var sheep_sheep_race_views_components_Button = function(text,texture) {
 	PIXI.Sprite.call(this,texture);
@@ -1441,6 +1505,9 @@ sheep_sheep_race_views_components_SheepSelector.prototype = $extend(PIXI.Contain
 		this.indexes.unshift(this.indexes.pop());
 		this.updateImage(this.indexes[0]);
 	}
+	,getCurrentIndex: function() {
+		return this.indexes[0];
+	}
 	,__class__: sheep_sheep_race_views_components_SheepSelector
 });
 var $_, $fid = 0;
@@ -1488,6 +1555,7 @@ sheep_sheep_race_events_FlowEvent.ADD_BET_POPUP = "addBetPopup";
 sheep_sheep_race_events_FlowEvent.ADD_ALERT_POPUP = "addAlertPopup";
 sheep_sheep_race_events_FlowEvent.ADD_BET_FEEDBACK_POPUP = "addBetFeedbackPopup";
 sheep_sheep_race_events_FlowEvent.ADD_STARTING_POPUP = "addStartingPopup";
+sheep_sheep_race_events_FlowEvent.REMOVE_LAST_FLOATING_VIEW = "removeLastFloatingView";
 sheep_sheep_race_info_AssetsInfo.FONT = "20px SetzerPixelFont";
 sheep_sheep_race_info_AssetsInfo.SHEEP_LOGO = "sheep_logo.png";
 sheep_sheep_race_info_AssetsInfo.BACKGROUND_GAME = "background_game.png";
